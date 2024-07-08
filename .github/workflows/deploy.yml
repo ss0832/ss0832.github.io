@@ -14,18 +14,11 @@ permissions:
 
 jobs:
 
-  test_and_build_and_deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: pnpm/action-setup@v2.2.2
-        with:
-          version: 7.1.0
-      - run: pnpm i --frozen-lockfile
 
   build:
     runs-on: ubuntu-latest
     steps:
+        uses: pnpm/action-setup@v2.2.2
       - name: Checkout your repository using git
         uses: actions/checkout@v4
       - name: Install, build, and upload your site
