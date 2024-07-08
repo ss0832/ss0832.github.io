@@ -21,7 +21,7 @@ jobs:
       - name: actions/checkout@v4
         uses: pnpm/action-setup@v2.2.2
         with:
-            version: 7.1.0
+            version: 9.4.0
       - run: pnpm i --frozen-lockfile
       - name: Checkout your repository using git
         uses: actions/checkout@v4
