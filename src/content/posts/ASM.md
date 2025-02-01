@@ -1,7 +1,7 @@
 ---
 title:  Activation Strain Model (ASM)を用いた解析方法
 published: 2025-02-01
-description: 
+description: ""
 tags: [ASM]
 category: Computational Chemistry
 draft: false
