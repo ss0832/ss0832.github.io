@@ -1,7 +1,7 @@
 ---
 title: Non-Covalent Interaction(NCI)の解析方法
 published: 2025-02-01
-description: A simple example of a Markdown blog post.
+description: ""
 tags: [NCIplot]
 category: Computational Chemistry
 draft: false
