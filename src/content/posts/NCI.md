@@ -1,7 +1,6 @@
 ---
 title: Non-Covalent Interaction(NCI)の解析方法
 published: 2025-02-01
-description: ""
 tags: [NCIplot]
 category: Computational Chemistry
 draft: false
