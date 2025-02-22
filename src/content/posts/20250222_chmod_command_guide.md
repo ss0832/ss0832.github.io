@@ -1,12 +1,12 @@
 ---
 title:  【Unix】chmodコマンドの解説
-published: 2025/02/22
+published: 2025-02-22
 description: ""
 tags: [chmod]
 category: Unix
 draft: false
 ---
-最終更新：2025/02/22
+最終更新：2025-02-22
 
 
 `chmod`コマンドは、Unix系システムにおいてファイルやディレクトリのパーミッション（アクセス権）を変更するための基本的なコマンドである。

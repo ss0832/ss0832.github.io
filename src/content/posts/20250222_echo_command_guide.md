@@ -1,12 +1,12 @@
 ---
 title:  【Unix】echoコマンドの解説
-published: 今日の年月日
+published: 2025-02-22
 description: ""
 tags: [echo]
 category: Unix
 draft: false
 ---
-最終更新：今日の年月日
+最終更新：2025-02-22
 
 # `echo`コマンドの解説
 

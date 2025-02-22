@@ -1,12 +1,12 @@
 ---
 title:  【Unix】topコマンドの解説
-published: 2025/02/22
+published: 2025-02-22
 description: ""
 tags: [top]
 category: Unix
 draft: false
 ---
-最終更新：2025/02/22
+最終更新：2025-02-22
 
 `top`コマンドは、Unix系システムにおいてリアルタイムでシステムリソースの使用状況やプロセスの動作状態を監視するためのツールである。
 

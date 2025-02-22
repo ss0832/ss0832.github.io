@@ -1,12 +1,12 @@
 ---
 title:  【Unix】cpコマンドの解説
-published: 2025/02/22
+published: 2025-02-22
 description: ""
 tags: [cp]
 category: Unix
 draft: false
 ---
-最終更新：2025/02/22
+最終更新：2025-02-22
 
 
 `cp`コマンドは、Unix系システムにおいてファイルやディレクトリのコピーを行うための基本的なコマンドである。

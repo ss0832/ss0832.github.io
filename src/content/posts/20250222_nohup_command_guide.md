@@ -1,12 +1,12 @@
 ---
 title:  【Unix】nohupコマンドの解説
-published: 2025/02/22
+published: 2025-02-22
 description: ""
 tags: [nohup]
 category: Unix
 draft: false
 ---
-最終更新：2025/02/22
+最終更新：2025-02-22
 
 
 `nohup`コマンドは、Unix系システムにおいて、ユーザーがログアウトした後も実行中のプロセスを継続させるためのツールである。

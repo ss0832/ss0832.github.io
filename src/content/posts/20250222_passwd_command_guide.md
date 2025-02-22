@@ -1,12 +1,12 @@
 ---
 title:  【Unix】passwdコマンドの解説
-published: 2025/02/22
+published: 2025-02-22
 description: ""
 tags: [passwd]
 category: Unix
 draft: false
 ---
-最終更新：2025/02/22
+最終更新：2025-02-22
 
 
 `passwd`コマンドは、Unix系システムにおいてユーザーのパスワードを設定または変更するための基本的なツールである。ユーザー自身はもちろん、管理者権限を持つユーザーが他のユーザーのパスワードを変更する際にも用いられる。

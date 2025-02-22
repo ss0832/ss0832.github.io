@@ -1,12 +1,12 @@
 ---
 title:  【Unix】lessコマンドの解説
-published: 2025/02/22
+published: 2025-02-22
 description: ""
 tags: [less]
 category: Unix
 draft: false
 ---
-最終更新：2025/02/22
+最終更新：2025-02-22
 
 `less`コマンドは、Unix系システムにおいてテキストファイルを効率的に閲覧するためのページャーである。大量のテキストを素早く表示し、必要な情報へ迅速にアクセスできる点が特長である。
 

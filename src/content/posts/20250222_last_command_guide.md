@@ -1,12 +1,12 @@
 ---
 title:  【Unix】lastコマンドの解説
-published: 2025/02/22
+published: 2025-02-22
 description: ""
 tags: [last]
 category: Unix
 draft: false
 ---
-最終更新：2025/02/22
+最終更新：2025-02-22
 
 
 `last`コマンドは、Unix系システムにおいて、システムにログインしたユーザーの履歴情報を表示するためのコマンドである。

@@ -1,12 +1,12 @@
 ---
 title:  【Unix】touchコマンドの解説
-published: 2025/02/22
+published: 2025-02-22
 description: ""
 tags: [touch]
 category: Unix
 draft: false
 ---
-最終更新：2025/02/22
+最終更新：2025-02-22
 
 
 `touch`コマンドは、Unix系システムにおいてファイルのタイムスタンプを更新するための基本的なコマンドである。もともとファイルが存在しない場合は、新規ファイルを作成する機能も持つ。
