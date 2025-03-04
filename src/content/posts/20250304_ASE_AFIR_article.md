@@ -1,5 +1,5 @@
 ---
-title:  【計算化学】ASE環境でAFIR法を使用する
+title:  【計算化学】ASEでAFIR法を使用する
 published: 2025-03-04
 description: "ASEを使った人工力誘起反応法の実装について解説"
 tags: [AFIR, ASE, Python, Quantum Chemistry, Reaction Coordinate]
