@@ -111,7 +111,7 @@ atoms.calc = afir_calc
 # 構造最適化の実行
 from ase.optimize import BFGS
 opt = BFGS(atoms, trajectory='claisen_reaction.traj')
-opt.run(fmax=0.0005, steps=200)
+opt.run(fmax=0.02, steps=200)
 
 # 反応軌跡の解析
 from analyze_trajectory import analyze_trajectory
