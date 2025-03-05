@@ -6,7 +6,7 @@ tags: [AFIR, ASE, Python, Quantum Chemistry, Reaction Coordinate]
 category: Computational Chemistry
 draft: false
 ---
-最終更新：2025-03-04
+最終更新：2025-03-05
 
 
 ASE_AFIR（Atomic Simulation Environment - Artificial Force Induced Reaction）と呼ばれるパッケージについて説明する。これは化学反応経路の自動探索を可能にする人工力誘起反応（AFIR）法をPythonの原子シミュレーション環境（ASE）に実装した自作のパッケージである。このパッケージでは、量子化学計算と分子動力学シミュレーションを組み合わせた反応経路探索機能を提供している。
@@ -99,9 +99,9 @@ qm_calc = Psi4(method='b3lyp', basis='6-31g')
 # AFIR計算の設定 - C=C結合形成のために人工力を適用
 afir_calc = ASE_AFIR(
     calculator=qm_calc,
-    AFIR_gamma=500.0,  # kJ/mol (optimizerと相性が悪いのかgammaの値を大きくしないとうまくいかない)
-    AFIR_Fragm_1=[5],  # ビニル基のC原子とH原子(原子を0からラベリングしている, ASEのフォーマットに合わせている)
-    AFIR_Fragm_2=[4],  # アリル基のC原子とH原子(原子を0からラベリングしている)
+    AFIR_gamma=150.0,  # kJ/mol 
+    AFIR_Fragm_1=[5, 7, 8],  # ビニル基のC原子とH原子(原子を0からラベリングしている, ASEのフォーマットに合わせている)
+    AFIR_Fragm_2=[4, 12, 13],  # アリル基のC原子とH原子(原子を0からラベリングしている)
     p=6.0
 )
 
@@ -132,10 +132,11 @@ analyze_trajectory()
 ```
 解析の結果、結合距離の変化や反応エネルギープロファイルのグラフなどが得られる。
 
-得られたAFIR経路のエネルギー極大値が遷移状態構造を求めるための候補構造となる。さらに、NEB(Nudged Elastic Band)法もしくはLUP(Locally Plains Update)法により、AFIR経路を緩和することで、より正確な遷移状態構造に近い候補を見つけることが可能である。
+得られたAFIR経路のエネルギー極大値が遷移状態構造を求めるための候補となる。さらに、NEB(Nudged Elastic Band)法もしくはLUP(Locally Plains Update)法により、AFIR経路を緩和することで、より正確な遷移状態構造に近い候補を見つけることが可能である。
 
 
 Repositoryはこちら：https://github.com/ss0832/ASE_AFIR
+
 
 
 ## 参考文献
@@ -143,3 +144,8 @@ Repositoryはこちら：https://github.com/ss0832/ASE_AFIR
 - S. Maeda, K. Morokuma, "Finding Reaction Pathways of Type A + B → X: Toward Systematic Prediction of Reaction Mechanisms", J. Chem. Theory Comput., 2011, 7, 2335-2345.
 - A. H. Larsen et al., "The atomic simulation environment—a Python library for working with atoms", J. Phys.: Condens. Matter, 2017, 29, 273002.
 - R. M. Parrish et al., "Psi4 1.1: An Open-Source Electronic Structure Program Emphasizing Automation, Advanced Libraries, and Interoperability", J. Chem. Theory Comput., 2017, 13, 3185-3197.
+
+### 追記・修正
+
+2025/3/5 プログラムの実装ミスを修正
+
