@@ -134,6 +134,184 @@ analyze_trajectory()
 
 得られたAFIR経路のエネルギー極大値が遷移状態構造を求めるための候補となる。さらに、NEB(Nudged Elastic Band)法もしくはLUP(Locally Plains Update)法により、AFIR経路を緩和することで、より正確な遷移状態構造に近い候補を見つけることが可能である。
 
+以下にNEB法による経路の緩和を行うプログラムを示す。
+```python
+"""
+XYZファイルから選択されたフレームに対してNEB計算を実行するスクリプト
+電子状態計算にはASEとPsi4を使用します。
+NEBの全最適化iterationのエネルギープロファイルを出力します。
+"""
+import numpy as np
+import matplotlib.pyplot as plt
+import os
+from ase.io import read, write
+from ase.mep import NEB
+from ase.optimize import BFGS
+from ase.calculators.psi4 import Psi4
+
+
+# パラメータ
+XYZ_FILE = 'claisen_reaction_animation.xyz'
+NUM_IMAGES = 30  # NEBに使用する画像数
+MAX_NEB_ITERATIONS = 10
+OUTPUT_DIR = 'neb_results'
+TS_DIR = 'ts_optimization'
+PROFILES_DIR = f'{OUTPUT_DIR}/energy_profiles'  # エネルギープロファイル保存ディレクトリ
+eV2kcalmol = 23.06031
+
+# 出力ディレクトリの作成（存在しない場合）
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+os.makedirs(TS_DIR, exist_ok=True)
+os.makedirs(PROFILES_DIR, exist_ok=True)
+
+# ステップ1: XYZファイルからすべての構造を読み込む
+print("Reading structures from XYZ file...")
+all_structures = read(XYZ_FILE, index=':')
+total_structures = len(all_structures)
+print(f"Found {total_structures} structures in the file.")
+
+# ステップ2: NEB経路用にNUM_IMAGES個の等間隔構造を選択
+if total_structures <= NUM_IMAGES:
+    images = all_structures
+    print("Using all available structures as there are fewer than requested.")
+else:
+    # 等間隔で構造を選択するためのインデックスを計算
+    indices = np.round(np.linspace(0, total_structures - 1, NUM_IMAGES)).astype(int)
+    images = [all_structures[i] for i in indices]
+    print(f"Selected {NUM_IMAGES} images with indices: {indices}")
+
+# ステップ3: B3LYP/6-31GでのPsi4計算機設定
+psi4_template = {
+    'basis': '6-31G',  # 基底関数
+    'method': 'B3LYP',     # 交換相関汎関数
+    'reference': 'RHF',  # 参照波動関数
+    'scf_type': 'pk',  # SCF収束のためのアルゴリズムの指定
+    'maxiter': 100,    # SCF最大iteration回数
+    'print': 1,        # 出力レベル
+    'mem': '2GB',       # メモリ割り当て
+    'num_threads': 8,       # 使用するCPUスレッド数
+    'psi4_options': {
+        'nthreads': 8, }
+}
+
+# ステップ4: NEB計算のセットアップ
+print("Setting up NEB calculation...")
+for i, image in enumerate(images):
+    calc = Psi4(**psi4_template)
+    image.calc = calc
+    # 初期構造を保存
+    write(f'{OUTPUT_DIR}/initial_image_{i:02d}.xyz', image)
+
+# NEBインスタンスの作成
+neb = NEB(images)  # 標準NEB
+### AFIR経路を内挿補間する必要はない
+
+# 各iterationでのエネルギープロファイル保存用関数
+iteration_count = [0]  # 関数内で変更できるようリストを使用
+
+def save_energy_profile():
+    """各iterationでエネルギープロファイルを保存"""
+    current_iter = iteration_count[0]
+    
+    # エネルギー計算
+    energies = [image.get_potential_energy() for image in images]
+    min_energy = min(energies)
+    rel_energies = [(e - min_energy) * eV2kcalmol for e in energies]
+    
+    # データをファイルに保存
+    with open(f'{PROFILES_DIR}/energy_profile_iter_{current_iter:03d}.dat', 'w') as f:
+        f.write("# Image Index, Energy (eV), Relative Energy (kcal/mol)\n")
+        for i, (e, rel_e) in enumerate(zip(energies, rel_energies)):
+            f.write(f"{i} {e} {rel_e}\n")
+    
+    # プロットの作成
+    plt.figure(figsize=(10, 6))
+    plt.plot(range(len(images)), rel_energies, 'o-')
+    plt.xlabel('Image Index')
+    plt.ylabel('Energy (kcal/mol)')
+    plt.title(f'NEB Energy Profile - Iteration {current_iter}')
+    plt.grid(True)
+    plt.savefig(f'{PROFILES_DIR}/energy_profile_iter_{current_iter:03d}.png')
+    plt.close()
+    
+    # 現在の経路のコピーを保存
+    write(f'{PROFILES_DIR}/neb_path_iter_{current_iter:03d}.xyz', images)
+    
+    # iterationカウンターをインクリメント
+    iteration_count[0] += 1
+    
+    # 現在の最大エネルギーポイントを出力
+    max_idx = np.argmax(rel_energies)
+    print(f"Iteration {current_iter}: Max energy at image {max_idx} = {rel_energies[max_idx]:.2f} kcal/mol")
+
+# 初期エネルギープロファイルを保存（iteration0）
+save_energy_profile()
+
+# ステップ5: NEB最適化の実行
+print(f"Starting NEB optimization for {MAX_NEB_ITERATIONS} iterations...")
+optimizer = BFGS(neb, trajectory=f'{OUTPUT_DIR}/neb_trajectory.traj')
+
+# エネルギープロファイル保存関数をオプティマイザに接続
+optimizer.attach(save_energy_profile)
+
+# オプティマイザの実行
+optimizer.run(fmax=0.05, steps=MAX_NEB_ITERATIONS)  # fmaxは力の許容値
+
+# ステップ6: 最終結果の分析
+print("NEB optimization completed. Creating final analysis...")
+
+# 最終NEB経路を保存
+write(f'{OUTPUT_DIR}/final_neb_path.xyz', images)
+
+# 分析用の最終エネルギーを計算
+final_energies = [image.get_potential_energy() for image in images]
+min_energy = min(final_energies)
+final_rel_energies = [(e - min_energy) * eV2kcalmol for e in final_energies]
+
+# 視覚性を向上させた最終エネルギープロファイルプロットの作成
+plt.figure(figsize=(10, 6))
+plt.plot(range(len(images)), final_rel_energies, 'o-', linewidth=2, color='blue')
+plt.xlabel('Image Index', fontsize=12)
+plt.ylabel('Energy (kcal/mol)', fontsize=12)
+plt.title('Final NEB Energy Profile', fontsize=14)
+plt.grid(True)
+
+# 反応物、遷移状態、生成物のマーカーを追加
+max_idx = np.argmax(final_rel_energies)
+plt.scatter([0, max_idx, len(images)-1], 
+            [final_rel_energies[0], final_rel_energies[max_idx], final_rel_energies[-1]], 
+            color=['green', 'red', 'purple'], 
+            s=100, zorder=5)
+plt.annotate('Reactant', (0, final_rel_energies[0]), textcoords="offset points", 
+             xytext=(0,10), ha='center', fontsize=10)
+plt.annotate('TS', (max_idx, final_rel_energies[max_idx]), textcoords="offset points", 
+             xytext=(0,10), ha='center', fontsize=10)
+plt.annotate('Product', (len(images)-1, final_rel_energies[-1]), textcoords="offset points", 
+             xytext=(0,10), ha='center', fontsize=10)
+
+plt.savefig(f'{OUTPUT_DIR}/final_energy_profile.png', dpi=300, bbox_inches='tight')
+print(f"Final energy profile saved to {OUTPUT_DIR}/final_energy_profile.png")
+
+# 最終エネルギーデータをファイルに保存
+with open(f'{OUTPUT_DIR}/final_energy_profile.dat', 'w') as f:
+    f.write("# Image Index, Energy (eV), Relative Energy (kcal/mol)\n")
+    for i, (e, rel_e) in enumerate(zip(final_energies, final_rel_energies)):
+        f.write(f"{i} {e} {rel_e}\n")
+
+# ステップ7: エネルギープロファイル上のエネルギー最大値の特定
+max_energy_idx = np.argmax(final_rel_energies)
+max_energy = final_rel_energies[max_energy_idx]
+print(f"Identified global maximum at image {max_energy_idx} with relative energy {max_energy:.2f} kcal/mol")
+
+# 遷移状態最適化用に画像のコピーを作成
+ts_guess = images[max_energy_idx].copy()
+ts_guess.calc = Psi4(**psi4_template)
+
+# 近似遷移状態構造を保存
+write(f'{TS_DIR}/ts_guess.xyz', ts_guess)
+
+```
+これにより、AFIR経路から得られる遷移状態構造の候補をより正確な遷移状態構造に近づけることが可能である。
 
 Repositoryはこちら：https://github.com/ss0832/ASE_AFIR
 
