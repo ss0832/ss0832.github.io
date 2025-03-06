@@ -6,7 +6,7 @@ tags: [AFIR, ASE, Python, Quantum Chemistry, Reaction Coordinate]
 category: Computational Chemistry
 draft: false
 ---
-最終更新：2025-03-05
+最終更新：2025-03-06
 
 
 ASE_AFIR（Atomic Simulation Environment - Artificial Force Induced Reaction）と呼ばれるパッケージについて説明する。これは化学反応経路の自動探索を可能にする人工力誘起反応（AFIR）法をPythonの原子シミュレーション環境（ASE）に実装した自作のパッケージである。このパッケージでは、量子化学計算と分子動力学シミュレーションを組み合わせた反応経路探索機能を提供している。
@@ -326,4 +326,4 @@ Repositoryはこちら：https://github.com/ss0832/ASE_AFIR
 ### 追記・修正
 
 2025/3/5 プログラムの実装ミスを修正。analyze_trajectory()で得られるエネルギーに人工力ポテンシャルが含まれるため、人工力なしのポテンシャルを取り出せるように実装しなおす予定である。
-
+2025/3/6 NEB法を実行するプログラムの追加
