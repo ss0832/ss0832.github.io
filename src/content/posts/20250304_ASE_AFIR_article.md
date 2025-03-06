@@ -176,9 +176,8 @@ if total_structures <= NUM_IMAGES:
     print("Using all available structures as there are fewer than requested.")
 else:
     # 等間隔で構造を選択するためのインデックスを計算
-    indices = np.round(np.linspace(0, total_structures - 1, NUM_IMAGES)).astype(int)
-    images = [all_structures[i] for i in indices]
-    print(f"Selected {NUM_IMAGES} images with indices: {indices}")
+    images = [all_structures[i] for i in range(NUM_IMAGES)]
+    print(f"Selected {NUM_IMAGES} images with indices: {images}")
 
 # ステップ3: B3LYP/6-31GでのPsi4計算機設定
 psi4_template = {
