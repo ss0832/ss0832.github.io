@@ -177,7 +177,7 @@ if total_structures <= NUM_IMAGES:
 else:
     # 等間隔で構造を選択するためのインデックスを計算
     images = [all_structures[i] for i in range(NUM_IMAGES)]
-    print(f"Selected {NUM_IMAGES} images with indices: {images}")
+    print(f"Selected {NUM_IMAGES} images.")
 
 # ステップ3: B3LYP/6-31GでのPsi4計算機設定
 psi4_template = {
