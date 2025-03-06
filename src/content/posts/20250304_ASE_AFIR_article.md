@@ -153,7 +153,7 @@ from ase.calculators.psi4 import Psi4
 # パラメータ
 XYZ_FILE = 'claisen_reaction_animation.xyz'
 NUM_IMAGES = 30  # NEBに使用する画像数
-MAX_NEB_ITERATIONS = 10
+MAX_NEB_ITERATIONS = 3
 OUTPUT_DIR = 'neb_results'
 TS_DIR = 'ts_optimization'
 PROFILES_DIR = f'{OUTPUT_DIR}/energy_profiles'  # エネルギープロファイル保存ディレクトリ
@@ -312,6 +312,7 @@ write(f'{TS_DIR}/ts_guess.xyz', ts_guess)
 
 ```
 これにより、AFIR経路から得られる遷移状態構造の候補をより正確な遷移状態構造に近づけることが可能である。
+もしうまくいかなければ、NEBのイメージ間のばねの力の大きさを変えてみたり（kの値を変える）、イメージの数を増減させてみたりするとよい。
 
 Repositoryはこちら：https://github.com/ss0832/ASE_AFIR
 
