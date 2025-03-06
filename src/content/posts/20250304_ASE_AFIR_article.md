@@ -152,7 +152,7 @@ from ase.calculators.psi4 import Psi4
 
 # パラメータ
 XYZ_FILE = 'claisen_reaction_animation.xyz'
-NUM_IMAGES = 30  # NEBに使用する画像数
+NUM_IMAGES = 50  # NEBに使用する画像数
 MAX_NEB_ITERATIONS = 3
 OUTPUT_DIR = 'neb_results'
 TS_DIR = 'ts_optimization'
