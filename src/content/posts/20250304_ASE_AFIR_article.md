@@ -203,7 +203,7 @@ for i, image in enumerate(images):
     write(f'{OUTPUT_DIR}/initial_image_{i:02d}.xyz', image)
 
 # NEBインスタンスの作成
-neb = NEB(images)  # 標準NEB
+neb = NEB(images, k=0.0)  # 標準NEB
 ### AFIR経路を内挿補間する必要はない
 
 # 各iterationでのエネルギープロファイル保存用関数
