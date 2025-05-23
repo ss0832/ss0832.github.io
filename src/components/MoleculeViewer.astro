@@ -57,10 +57,10 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
         // Add molecular model from XYZ data
         viewer.addModel(xyzData, "xyz");
         
-        // Set molecular style
+        // Set molecular style - fix the colorscheme property
         viewer.setStyle({}, {
-          sphere: { scale: 0.3, colorscheme: "elem" },
-          stick: { radius: 0.15, colorscheme: "elem" }
+          sphere: { scale: 0.3, colorscheme: "Jmol" },
+          stick: { radius: 0.15, colorscheme: "Jmol" }
         });
 
         // Optimize view and render
@@ -70,9 +70,9 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
         // Mark as initialized
         container.dataset.initialized = 'true';
         
-        console.log(`Molecule viewer '${container.id}' initialized`);
+        console.log(`Molecule viewer initialized for container:`, container.id);
       } catch (error) {
-        console.error(`Error initializing molecule viewer: ${error.message}`);
+        console.error(`Error initializing molecule viewer:`, error.message);
       }
     });
   });
