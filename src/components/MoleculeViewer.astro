@@ -23,7 +23,12 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 
 <!-- Viewer container -->
 <figure class="molecule-viewer-container">
-  <div id={viewerId} style={`width:${width}; height:${height}; position:relative; border-radius:8px; overflow:hidden;`}></div>
+  <div 
+    id={viewerId} 
+    data-xyz={xyzData}
+    data-bg-color={backgroundColor}
+    style={`width:${width}; height:${height}; position:relative; border-radius:8px; overflow:hidden;`}>
+  </div>
   {caption && <figcaption>{caption}</figcaption>}
 </figure>
 
@@ -32,16 +37,22 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 <script is:inline src="https://3Dmol.org/build/3Dmol.ui-min.js"></script>
 
 <!-- Molecule viewer initialization script -->
-<script define:vars={{ xyzData, viewerId, backgroundColor }}>
+<script is:inline>
   document.addEventListener('DOMContentLoaded', () => {
-    // Check if the viewer has already been initialized
-    if (document.getElementById(viewerId)) {
+    // Find all molecule viewer containers
+    const containers = document.querySelectorAll('[data-xyz]');
+    
+    containers.forEach((container) => {
+      if (container.dataset.initialized) return;
+      
       try {
+        const xyzData = container.dataset.xyz;
+        const backgroundColor = container.dataset.bgColor || 'white';
+        
         // Initialize 3Dmol.js viewer
-        const viewer = $3Dmol.createViewer(
-          document.getElementById(viewerId),
-          { backgroundColor: backgroundColor }
-        );
+        const viewer = $3Dmol.createViewer(container, { 
+          backgroundColor: backgroundColor 
+        });
 
         // Add molecular model from XYZ data
         viewer.addModel(xyzData, "xyz");
@@ -56,11 +67,14 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
         viewer.zoomTo();
         viewer.render();
         
-        console.log(`Molecule viewer '${viewerId}' initialized`);
+        // Mark as initialized
+        container.dataset.initialized = 'true';
+        
+        console.log(`Molecule viewer '${container.id}' initialized`);
       } catch (error) {
         console.error(`Error initializing molecule viewer: ${error.message}`);
       }
-    }
+    });
   });
 </script>
 
