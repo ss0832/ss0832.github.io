@@ -1,25 +1,3 @@
----
-// Property definitions
-interface Props {
-  xyzData: string;
-  width?: string;
-  height?: string;
-  backgroundColor?: string;
-  caption?: string;
-}
-
-// Get properties and set default values
-const { 
-  xyzData, 
-  width = "100%", 
-  height = "400px",
-  backgroundColor = "white",
-  caption
-} = Astro.props;
-
-// Generate a unique ID
-const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
----
 
 <!-- Viewer container -->
 <figure class="molecule-viewer-container">
