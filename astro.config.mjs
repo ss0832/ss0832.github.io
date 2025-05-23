@@ -34,6 +34,7 @@ export default defineConfig({
   base: "/",
   trailingSlash: "always",
   integrations: [
+    mdx(),
     tailwind(),
     swup({
       theme: false,
