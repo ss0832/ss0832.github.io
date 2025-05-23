@@ -58,9 +58,15 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
         if (showLabels) {
           let atoms = viewer.selectedAtoms({});
           atoms.forEach((atom, idx) => {
+            const position = {
+              x: atom.x + 0.1,  
+              y: atom.y + 0.1, 
+              z: atom.z
+            };
+            
             viewer.addLabel(`${idx+1}:${atom.elem}`, {
-              position: atom,
-              backgroundColor: "rgba(255,255,255,0.7)",
+              position: position, 
+              backgroundColor: "rgba(255,255,255,0.4)",  
               fontColor: "black",
               fontSize: 12,
               alignment: "center"
