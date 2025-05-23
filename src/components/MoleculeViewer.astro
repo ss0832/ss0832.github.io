@@ -23,12 +23,7 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 
 <!-- Viewer container -->
 <figure class="molecule-viewer-container">
-  <div 
-    id={viewerId} 
-    data-xyz={xyzData}
-    data-bg-color={backgroundColor}
-    style={`width:${width}; height:${height}; position:relative; border-radius:8px; overflow:hidden;`}>
-  </div>
+  <div id={viewerId} client:load style={`width:${width}; height:${height}; position:relative; border-radius:8px; overflow:hidden;`}></div>
   {caption && <figcaption>{caption}</figcaption>}
 </figure>
 
@@ -37,44 +32,35 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 <script is:inline src="https://3Dmol.org/build/3Dmol.ui-min.js"></script>
 
 <!-- Molecule viewer initialization script -->
-<script is:inline>
+<script define:vars={{ xyzData, viewerId, backgroundColor }}>
   document.addEventListener('DOMContentLoaded', () => {
-    // Find all molecule viewer containers
-    const containers = document.querySelectorAll('[data-xyz]');
-    
-    containers.forEach((container) => {
-      if (container.dataset.initialized) return;
-      
+    // Check if the viewer element exists
+    if (document.getElementById(viewerId)) {
       try {
-        const xyzData = container.dataset.xyz;
-        const backgroundColor = container.dataset.bgColor || 'white';
-        
         // Initialize 3Dmol.js viewer
-        const viewer = $3Dmol.createViewer(container, { 
-          backgroundColor: backgroundColor 
-        });
+        const viewer = $3Dmol.createViewer(
+          document.getElementById(viewerId),
+          { backgroundColor: backgroundColor }
+        );
 
         // Add molecular model from XYZ data
         viewer.addModel(xyzData, "xyz");
         
-        // Set molecular style - fix the colorscheme property
+        // Set molecular style
         viewer.setStyle({}, {
-          sphere: { scale: 0.3, colorscheme: "Jmol" },
-          stick: { radius: 0.15, colorscheme: "Jmol" }
+          sphere: { scale: 0.3, colorscheme: "elem" },
+          stick: { radius: 0.15, colorscheme: "elem" }
         });
 
         // Optimize view and render
         viewer.zoomTo();
         viewer.render();
         
-        // Mark as initialized
-        container.dataset.initialized = 'true';
-        
-        console.log(`Molecule viewer initialized for container:`, container.id);
+        console.log(`Molecule viewer '${viewerId}' initialized`);
       } catch (error) {
-        console.error(`Error initializing molecule viewer:`, error.message);
+        console.error(`Molecule viewer initialization error: ${error.message}`);
       }
-    });
+    }
   });
 </script>
 
