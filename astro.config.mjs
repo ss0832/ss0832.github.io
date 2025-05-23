@@ -16,6 +16,7 @@ import rehypeComponents from "rehype-components"; /* Render the custom directive
 import svelte from "@astrojs/svelte"
 import swup from '@swup/astro';
 import sitemap from '@astrojs/sitemap';
+import mdx from '@astrojs/mdx';
 import {parseDirectiveNode} from "./src/plugins/remark-directive-rehype.js";
 
 const oklchToHex = (str) => {
