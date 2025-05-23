@@ -6,7 +6,6 @@ interface Props {
   height?: string;
   backgroundColor?: string;
   caption?: string;
-  style?: 'ball-stick' | 'space-filling' | 'wireframe' | 'cartoon';
 }
 
 // Get properties and set default values
@@ -15,8 +14,7 @@ const {
   width = "100%", 
   height = "400px",
   backgroundColor = "white",
-  caption,
-  style = "ball-stick"
+  caption
 } = Astro.props;
 
 // Generate a unique ID
@@ -24,17 +22,9 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 ---
 
 <!-- Viewer container -->
-<figure class="molecule-viewer-container my-8">
-  <div 
-    id={viewerId} 
-    class="relative rounded-lg overflow-hidden border border-neutral-200 dark:border-neutral-700"
-    style={`width:${width}; height:${height};`}
-  ></div>
-  {caption && (
-    <figcaption class="text-center mt-2 text-sm text-neutral-600 dark:text-neutral-400">
-      {caption}
-    </figcaption>
-  )}
+<figure class="molecule-viewer-container">
+  <div id={viewerId} style={`width:${width}; height:${height}; position:relative; border-radius:8px; overflow:hidden;`}></div>
+  {caption && <figcaption>{caption}</figcaption>}
 </figure>
 
 <!-- Load 3Dmol.js libraries -->
@@ -42,95 +32,47 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 <script is:inline src="https://3Dmol.org/build/3Dmol.ui-min.js"></script>
 
 <!-- Molecule viewer initialization script -->
-<script define:vars={{ xyzData, viewerId, backgroundColor, style }}>
-  // Wait for DOM and 3Dmol.js to be ready
-  function initMoleculeViewer() {
-    if (typeof $3Dmol === 'undefined') {
-      setTimeout(initMoleculeViewer, 100);
-      return;
-    }
-    
-    const element = document.getElementById(viewerId);
-    if (!element) return;
-    
-    try {
-      // Initialize 3Dmol.js viewer
-      const viewer = $3Dmol.createViewer(element, { 
-        backgroundColor: backgroundColor,
-        antialias: true,
-        cartoonQuality: 10
-      });
+<script define:vars={{ xyzData, viewerId, backgroundColor }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Check if the viewer has already been initialized
+    if (document.getElementById(viewerId)) {
+      try {
+        // Initialize 3Dmol.js viewer
+        const viewer = $3Dmol.createViewer(
+          document.getElementById(viewerId),
+          { backgroundColor: backgroundColor }
+        );
 
-      // Add molecular model from XYZ data
-      viewer.addModel(xyzData, "xyz");
-      
-      // Set molecular style based on the style prop
-      let styleConfig = {};
-      switch(style) {
-        case 'space-filling':
-          styleConfig = { sphere: { scale: 0.8, colorscheme: "elem" } };
-          break;
-        case 'wireframe':
-          styleConfig = { line: { colorscheme: "elem" } };
-          break;
-        case 'cartoon':
-          styleConfig = { cartoon: { color: "spectrum" } };
-          break;
-        case 'ball-stick':
-        default:
-          styleConfig = {
-            sphere: { scale: 0.3, colorscheme: "elem" },
-            stick: { radius: 0.15, colorscheme: "elem" }
-          };
-      }
-      
-      viewer.setStyle({}, styleConfig);
-
-      // Add hover effects
-      viewer.setHoverable({}, true, function(atom) {
-        viewer.addLabel(`${atom.elem}${atom.serial}`, {
-          position: atom,
-          backgroundColor: "rgba(0,0,0,0.8)",
-          fontColor: "white",
-          fontSize: 12,
-          alignment: "center"
+        // Add molecular model from XYZ data
+        viewer.addModel(xyzData, "xyz");
+        
+        // Set molecular style
+        viewer.setStyle({}, {
+          sphere: { scale: 0.3, colorscheme: "elem" },
+          stick: { radius: 0.15, colorscheme: "elem" }
         });
-      }, function(atom) {
-        viewer.removeAllLabels();
-      });
 
-      // Optimize view and render
-      viewer.zoomTo();
-      viewer.render();
-      
-      console.log(`Molecule viewer '${viewerId}' initialized with style: ${style}`);
-    } catch (error) {
-      console.error(`Error initializing molecule viewer: ${error.message}`);
-      // Show error message in the viewer
-      const element = document.getElementById(viewerId);
-      if (element) {
-        element.innerHTML = `
-          <div class="flex items-center justify-center h-full bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400">
-            <div class="text-center">
-              <p class="font-semibold">Molecular Viewer Initialization Error</p>
-              <p class="text-sm mt-1">${error.message}</p>
-            </div>
-          </div>
-        `;
+        // Optimize view and render
+        viewer.zoomTo();
+        viewer.render();
+        
+        console.log(`Molecule viewer '${viewerId}' initialized`);
+      } catch (error) {
+        console.error(`Error initializing molecule viewer: ${error.message}`);
       }
     }
-  }
-
-  // Initialize when DOM is ready
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initMoleculeViewer);
-  } else {
-    initMoleculeViewer();
-  }
+  });
 </script>
 
 <style>
   .molecule-viewer-container {
-   
+    margin: 2rem 0;
+  }
+  
+  figcaption {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
   }
 </style>
