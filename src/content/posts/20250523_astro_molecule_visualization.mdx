@@ -12,7 +12,7 @@ import MoleculeViewer from '../../components/MoleculeViewer.astro';
 
 # 分子構造の3D可視化
 
-このページでは、Astroブログに実装した3D分子ビューアコンポーネントのデモを示します。
+このページでは、3Dmol.jsライブラリを使用した分子構造の可視化機能をテストするために作成した。
 
 ## 水分子（H₂O）
 
@@ -22,8 +22,7 @@ water molecule
 O   0.000   0.000   0.000
 H   0.000   0.757   0.586
 H   0.000  -0.757   0.586`}
-  caption="水分子（H₂O）の3D構造 - Ball & Stick モデル"
-  style="ball-stick"
+  caption="水分子（H₂O）の3D構造"
 />
 
 ## メタン分子（CH₄）
@@ -36,30 +35,12 @@ H   0.642   0.642   0.642
 H  -0.642  -0.642   0.642
 H   0.642  -0.642  -0.642
 H  -0.642   0.642  -0.642`}
-  caption="メタン分子（CH₄）の3D構造 - Space Filling モデル"
-  style="space-filling"
+  caption="メタン分子（CH₄）の3D構造"
   backgroundColor="#f8f9fa"
+  height="450px"
 />
 
-## アンモニア分子（NH₃）
 
-<MoleculeViewer 
-  xyzData={`4
-ammonia molecule
-N   0.000   0.000   0.000
-H   0.000   0.937   0.383
-H   0.812  -0.469   0.383
-H  -0.812  -0.469   0.383`}
-  caption="アンモニア分子（NH₃）の3D構造"
-  height="350px"
-/>
-
-## 操作方法
-
-- **回転**: マウスドラッグ
-- **ズーム**: マウスホイール
-- **パン**: Shift + マウスドラッグ
-- **原子情報**: 原子にマウスホバー
 
 
 
