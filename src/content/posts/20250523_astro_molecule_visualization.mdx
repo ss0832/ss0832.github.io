@@ -1,0 +1,32 @@
+---
+title:  【Astro】分子構造の可視化
+published: 2025-05-23
+description: ""
+tags: [Astro]
+category: Computational Chemistry
+draft: false
+---
+最終更新：2025-05-23
+
+import MoleculeViewer from '../components/MoleculeViewer.astro';
+
+# 分子構造の3D可視化
+
+この記事では、分子構造を3Dで表示するテストを行うために作成された。
+
+## 水分子の構造
+
+水分子（H₂O）を可視化する。
+
+<MoleculeViewer 
+  xyzData={`3
+water molecule
+O   0.000   0.000   0.000
+H   0.000   0.757   0.586
+H   0.000  -0.757   0.586`}
+  caption="水分子（H₂O）の3D構造"
+/>
+
+author: ss0832
+
+
