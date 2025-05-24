@@ -31,43 +31,43 @@ const {
 const chartId = `multi-chart-${Math.random().toString(36).substring(2, 9)}`;
 ---
 
+<!-- Load Chart.js library first -->
+<script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
 <!-- Graph container -->
 <figure class="graph-container">
   <div style={`width:${width}; height:${height}; position:relative;`}>
-    <canvas id={chartId} client:load></canvas>
+    <canvas id={chartId}></canvas>
   </div>
   {title && <figcaption>{title}</figcaption>}
 </figure>
 
-<!-- Load Chart.js library -->
-<script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-
-<!-- Graph initialization script -->
-<script define:vars={{ datasets, chartId, backgroundColor, xLabel, yLabel, showGrid, title }}>
-  document.addEventListener('DOMContentLoaded', () => {
+<!-- Graph initialization script with client:idle -->
+<script define:vars={{ datasets, chartId, backgroundColor, xLabel, yLabel, showGrid, title }} client:idle>
+  // Get maximum data length
+  const maxLength = Math.max(...datasets.map(ds => ds.data.length));
+  
+  // Generate labels
+  const labels = Array.from({ length: maxLength }, (_, i) => i + 1);
+  
+  // Format datasets
+  const chartDatasets = datasets.map(ds => ({
+    label: ds.label,
+    data: ds.data,
+    borderColor: ds.color,
+    backgroundColor: ds.color.replace('1)', '0.1)'),
+    borderWidth: 2,
+    tension: 0.2,
+    pointRadius: 1,
+    pointHoverRadius: 5,
+    fill: true
+  }));
+  
+  function initChart() {
     const ctx = document.getElementById(chartId);
     
-    if (ctx) {
+    if (ctx && window.Chart) {
       try {
-        // Get maximum data length
-        const maxLength = Math.max(...datasets.map(ds => ds.data.length));
-        
-        // Generate labels
-        const labels = Array.from({ length: maxLength }, (_, i) => i + 1);
-        
-        // Format datasets
-        const chartDatasets = datasets.map(ds => ({
-          label: ds.label,
-          data: ds.data,
-          borderColor: ds.color,
-          backgroundColor: ds.color.replace('1)', '0.1)'),
-          borderWidth: 2,
-          tension: 0.2,
-          pointRadius: 1,
-          pointHoverRadius: 5,
-          fill: true
-        }));
-        
         new Chart(ctx, {
           type: 'line',
           data: {
@@ -118,12 +118,18 @@ const chartId = `multi-chart-${Math.random().toString(36).substring(2, 9)}`;
           }
         });
         
-        console.log(`Multi-graph '${chartId}' initialization completed`);
+        console.log(`Multi-graph '${chartId}' initialized successfully`);
       } catch (error) {
         console.error(`Graph initialization error: ${error.message}`);
       }
+    } else {
+      // Retry if element or Chart.js not found
+      setTimeout(initChart, 50);
     }
-  });
+  }
+  
+  // Start initialization immediately
+  initChart();
 </script>
 
 <style>
