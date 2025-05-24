@@ -1,5 +1,4 @@
 ---
-// Property definitions
 interface Props {
   xyzData: string;
   width?: string;
@@ -9,35 +8,34 @@ interface Props {
   showLabels?: boolean;
 }
 
-// Get properties and set default values
 const { 
   xyzData, 
   width = "100%", 
   height = "400px",
   backgroundColor = "white",
   caption,
-  showLabels = true
+  showLabels = false
 } = Astro.props;
 
 // Generate a unique ID
 const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 ---
 
-<!-- Viewer container -->
-<figure class="molecule-viewer-container">
-  <div id={viewerId} client:load style={`width:${width}; height:${height}; position:relative; border-radius:8px; overflow:hidden;`}></div>
-  {caption && <figcaption>{caption}</figcaption>}
-</figure>
-
-<!-- Load 3Dmol.js libraries -->
+<!-- Load 3Dmol.js libraries first -->
 <script is:inline src="https://3Dmol.org/build/3Dmol-min.js"></script>
 <script is:inline src="https://3Dmol.org/build/3Dmol.ui-min.js"></script>
 
-<!-- Molecule viewer initialization script -->
-<script define:vars={{ xyzData, viewerId, backgroundColor, showLabels }}>
-  document.addEventListener('DOMContentLoaded', () => {
-    // Check if the viewer element exists
-    if (document.getElementById(viewerId)) {
+<!-- Viewer container -->
+<figure class="molecule-viewer-container">
+  <div id={viewerId} style={`width:${width}; height:${height}; position:relative; border-radius:8px; overflow:hidden;`}></div>
+  {caption && <figcaption>{caption}</figcaption>}
+</figure>
+
+<!-- Molecule viewer initialization script with client:idle -->
+<script define:vars={{ xyzData, viewerId, backgroundColor, showLabels }} client:idle>
+  function initViewer() {
+    // Check if the viewer element exists and 3Dmol is loaded
+    if (document.getElementById(viewerId) && window.$3Dmol) {
       try {
         // Initialize 3Dmol.js viewer
         const viewer = $3Dmol.createViewer(
@@ -58,17 +56,18 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
         if (showLabels) {
           let atoms = viewer.selectedAtoms({});
           atoms.forEach((atom, idx) => {
+            // Calculate position with offset
             const position = {
-              x: atom.x + 0.3,  
-              y: atom.y + 0.3, 
+              x: atom.x + 0.3,  // Offset to the right
+              y: atom.y + 0.3,  // Offset upwards
               z: atom.z
             };
             
-            viewer.addLabel(`${idx+1}:${atom.elem}`, {
-              position: position, 
-              backgroundColor: "rgba(255,255,255,0.25)",  
+            viewer.addLabel(`[${idx+1}:${atom.elem}]`, {
+              position: position,
+              backgroundColor: "rgba(255,255,255,0.4)",  // Semi-transparent background
               fontColor: "black",
-              fontSize: 10,
+              fontSize: 12,
               alignment: "center"
             });
           });
@@ -78,12 +77,18 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
         viewer.zoomTo();
         viewer.render();
         
-        console.log(`Molecule viewer '${viewerId}' initialized`);
+        console.log(`Molecule viewer '${viewerId}' initialized successfully`);
       } catch (error) {
         console.error(`Molecule viewer initialization error: ${error.message}`);
       }
+    } else {
+      // Retry if element or 3Dmol not found
+      setTimeout(initViewer, 50);
     }
-  });
+  }
+  
+  // Start initialization immediately
+  initViewer();
 </script>
 
 <style>
