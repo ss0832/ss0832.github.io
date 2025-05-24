@@ -1,5 +1,4 @@
 ---
-// Property definitions
 interface Props {
   data: number[];
   width?: string;
@@ -12,7 +11,6 @@ interface Props {
   showGrid?: boolean;
 }
 
-// Get properties and set default values
 const { 
   data,
   width = "100%", 
@@ -29,27 +27,28 @@ const {
 const chartId = `chart-${Math.random().toString(36).substring(2, 9)}`;
 ---
 
+<!-- Load Chart.js library first -->
+<script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
 <!-- Graph container -->
 <figure class="graph-container">
   <div style={`width:${width}; height:${height}; position:relative;`}>
-    <canvas id={chartId} client:load></canvas>
+    <canvas id={chartId}></canvas>
   </div>
   {title && <figcaption>{title}</figcaption>}
 </figure>
 
-<!-- Load Chart.js library -->
-<script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
-
-<!-- Graph initialization script -->
-<script define:vars={{ data, chartId, lineColor, backgroundColor, xLabel, yLabel, showGrid, title }}>
-  document.addEventListener('DOMContentLoaded', () => {
+<!-- Graph initialization script with client:idle for better loading behavior -->
+<script define:vars={{ data, chartId, lineColor, backgroundColor, xLabel, yLabel, showGrid, title }} client:idle>
+  // Generate labels based on data length
+  const labels = Array.from({ length: data.length }, (_, i) => i + 1);
+  
+  // Check for element existence and Chart.js initialization
+  function initChart() {
     const ctx = document.getElementById(chartId);
     
-    if (ctx) {
+    if (ctx && window.Chart) {
       try {
-        // Generate labels based on data length
-        const labels = Array.from({ length: data.length }, (_, i) => i + 1);
-        
         new Chart(ctx, {
           type: 'line',
           data: {
@@ -76,7 +75,7 @@ const chartId = `chart-${Math.random().toString(36).substring(2, 9)}`;
               tooltip: {
                 callbacks: {
                   title: function(tooltipItems) {
-                    return `Data Point: ${tooltipItems[0].label}`;
+                    return `Data point: ${tooltipItems[0].label}`;
                   },
                   label: function(context) {
                     return `Value: ${context.parsed.y.toFixed(4)}`;
@@ -108,12 +107,18 @@ const chartId = `chart-${Math.random().toString(36).substring(2, 9)}`;
             }
           }
         });
-        console.log(`Graph '${chartId}' initialized with ${data.length} data points`);
+        console.log(`Graph '${chartId}' initialized successfully with ${data.length} data points`);
       } catch (error) {
         console.error(`Graph initialization error: ${error.message}`);
       }
+    } else {
+      // Retry if element or Chart.js not found
+      setTimeout(initChart, 50);
     }
-  });
+  }
+  
+  // Start initialization immediately
+  initChart();
 </script>
 
 <style>
