@@ -63,11 +63,11 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
               z: atom.z
             };
             
-            viewer.addLabel(`[${idx+1}:${atom.elem}]`, {
+            viewer.addLabel(`${idx+1}:${atom.elem}`, {
               position: position,
-              backgroundColor: "rgba(255,255,255,0.4)",  // Semi-transparent background
+              backgroundColor: "rgba(255,255,255,0.25)",  // Semi-transparent background
               fontColor: "black",
-              fontSize: 12,
+              fontSize: 10.5,
               alignment: "center"
             });
           });
