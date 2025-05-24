@@ -1,0 +1,140 @@
+---
+interface Dataset {
+  data: number[];
+  label: string;
+  color: string;
+}
+
+interface Props {
+  datasets: Dataset[];
+  width?: string;
+  height?: string;
+  backgroundColor?: string;
+  title?: string;
+  xLabel?: string;
+  yLabel?: string;
+  showGrid?: boolean;
+}
+
+const { 
+  datasets,
+  width = "100%", 
+  height = "400px",
+  backgroundColor = "rgba(255, 255, 255, 0.8)",
+  title = "",
+  xLabel = "",
+  yLabel = "",
+  showGrid = true
+} = Astro.props;
+
+// Generate a unique ID
+const chartId = `multi-chart-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<!-- Graph container -->
+<figure class="graph-container">
+  <div style={`width:${width}; height:${height}; position:relative;`}>
+    <canvas id={chartId} client:load></canvas>
+  </div>
+  {title && <figcaption>{title}</figcaption>}
+</figure>
+
+<!-- Load Chart.js library -->
+<script is:inline src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+<!-- Graph initialization script -->
+<script define:vars={{ datasets, chartId, backgroundColor, xLabel, yLabel, showGrid, title }}>
+  document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById(chartId);
+    
+    if (ctx) {
+      try {
+        // Get maximum data length
+        const maxLength = Math.max(...datasets.map(ds => ds.data.length));
+        
+        // Generate labels
+        const labels = Array.from({ length: maxLength }, (_, i) => i + 1);
+        
+        // Format datasets
+        const chartDatasets = datasets.map(ds => ({
+          label: ds.label,
+          data: ds.data,
+          borderColor: ds.color,
+          backgroundColor: ds.color.replace('1)', '0.1)'),
+          borderWidth: 2,
+          tension: 0.2,
+          pointRadius: 1,
+          pointHoverRadius: 5,
+          fill: true
+        }));
+        
+        new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: chartDatasets
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              title: {
+                display: !!title,
+                text: title
+              },
+              tooltip: {
+                callbacks: {
+                  title: function(tooltipItems) {
+                    return `Data point: ${tooltipItems[0].label}`;
+                  },
+                  label: function(context) {
+                    return `${context.dataset.label}: ${context.parsed.y.toFixed(4)}`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                display: true,
+                title: {
+                  display: !!xLabel,
+                  text: xLabel
+                },
+                grid: {
+                  display: showGrid
+                }
+              },
+              y: {
+                display: true,
+                title: {
+                  display: !!yLabel,
+                  text: yLabel
+                },
+                grid: {
+                  display: showGrid
+                }
+              }
+            }
+          }
+        });
+        
+        console.log(`Multi-graph '${chartId}' initialization completed`);
+      } catch (error) {
+        console.error(`Graph initialization error: ${error.message}`);
+      }
+    }
+  });
+</script>
+
+<style>
+  .graph-container {
+    margin: 2rem 0;
+  }
+  
+  figcaption {
+    text-align: center;
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+    color: #666;
+  }
+</style>
