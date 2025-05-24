@@ -76,7 +76,7 @@ const chartId = `chart-${Math.random().toString(36).substring(2, 9)}`;
               tooltip: {
                 callbacks: {
                   title: function(tooltipItems) {
-                    return `Datapoints: ${tooltipItems[0].label}`;
+                    return `Data Point: ${tooltipItems[0].label}`;
                   },
                   label: function(context) {
                     return `Value: ${context.parsed.y.toFixed(4)}`;
