@@ -125,7 +125,7 @@ python optmain.py vilsmeier_haack_rxn.xyz -pyscf -spin 0 -elec 1 -func hf -bs 3-
 - `-opt rsirfo_fsb`は準ニュートン法であるRS-I-RFO法を構造最適化に使用することを示す。初期のへシアンに関しては、特にオプションで指定しない限り、単位行列が使われる。
 - `-pyscf`は使用する電子状態計算ソフトウェアをPySCFにすることを示す。
 - `-spin`はスピン多重度の指定である。PySCFを使用するときは目的とするスピン多重度に1を引いた値を指定する。
-- `-elec -1`は形式電荷を-1とすることを示す。
+- `-elec N`は形式電荷をNとすることを示す。
 - `-ma yyy a b `はyyykJ/molの活性化障壁を超えうるペア同士を近づける力を原子のラベル番号aとbのペアに構造最適化時に加えることを示す。
 - `-func hf`はHartree-Fock法を用いることを示す。
 - `-bs 3-21g`は基底関数にPople系である`3-21G`を用いることを示す。
