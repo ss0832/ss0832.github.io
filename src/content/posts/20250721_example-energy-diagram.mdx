@@ -1,0 +1,43 @@
+---
+title: 【Astro】エネルギーダイアグラムの可視化テスト
+published: 2025-07-21
+description: ""
+tags: [Astro, Chemistry]
+category: Computational Chemistry
+draft: false
+---
+最終更新：2025-07-21
+
+import EnergyDiagram from '../components/EnergyDiagram.astro';
+
+# Energy Profile Diagram の可視化
+
+
+以下は、架空の化学反応の各素過程のエネルギープロファイルをダイアグラムとして可視化したものである。
+
+<EnergyDiagram
+  data={[
+    { name: "Reactants", energy: 0.0 },
+    { name: "TS1", energy: 15.2, transitionState: true },
+    { name: "Intermediate", energy: 5.8 },
+    { name: "TS2", energy: 20.5, transitionState: true },
+    { name: "Products", energy: -8.3 }
+  ]}
+  energyUnit="kcal/mol"
+  title="Sample Reaction Energy Profile"
+  width={700}
+  height={400}
+/>
+
+## 見方
+
+このエネルギー図は、反応経路全体のエネルギー変化を示している：
+
+1. **反応物質**： 出発物質 (0.0 kcal/mol)
+2. **TS1**： 最初の遷移状態(15.2 kcal/mol)
+3. **中間体**： 反応中に生成する安定な中間体(5.8 kcal/mol)
+4. **TS2**： 第二遷移状態(20.5 kcal/mol)
+5. **生成物**： 最終生成物 (-8.3 kcal/mol)
+
+生成物のエネルギー値が負であることは、反応が発熱的であることを示している。
+
