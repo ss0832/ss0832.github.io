@@ -1,7 +1,6 @@
 ---
 // EnergyDiagram.astro - Energy profile diagram component for Astro
 
-
 interface EnergyPoint {
   name: string;
   energy: number;
@@ -26,6 +25,7 @@ interface Props {
   fontSize?: number;
   lineWidth?: number;
   horizontalLength?: number;
+  leftMargin?: number;
 }
 
 const {
@@ -46,6 +46,7 @@ const {
   fontSize = 14,
   lineWidth = 2,
   horizontalLength = 40,
+  leftMargin = 120, // Increased left margin for more space
 } = Astro.props;
 
 // Generate a unique ID for the canvas element
@@ -56,7 +57,7 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
   <canvas id={canvasId} width={width} height={height}></canvas>
 </div>
 
-<script define:vars={{ data, canvasId, title, yLabel, xLabel, energyUnit, colors, fontSize, lineWidth, width, height, horizontalLength }}>
+<script define:vars={{ data, canvasId, title, yLabel, xLabel, energyUnit, colors, fontSize, lineWidth, width, height, horizontalLength, leftMargin }}>
   // Function to draw the energy diagram
   function drawEnergyDiagram() {
     try {
@@ -79,7 +80,7 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
         top: 50,
         right: 60,
         bottom: 70,
-        left: 80
+        left: leftMargin // Using the custom left margin
       };
       const plotWidth = width - margin.left - margin.right;
       const plotHeight = height - margin.top - margin.bottom;
@@ -100,40 +101,25 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
       };
       
       // Calculate X coordinates for each point
-      // This is more complex for PyEnergyDiagrams style with horizontal segments
       const points = [];
-      let totalX = margin.left;
+      let totalX = margin.left + horizontalLength; // Start with extra space on left
       
       for (let i = 0; i < data.length; i++) {
         const y = energyToY(data[i].energy);
         
-        // For transition states, we don't add horizontal segments
-        if (!data[i].transitionState) {
-          points.push({
-            x: totalX,
-            y: y,
-            energy: data[i].energy,
-            name: data[i].name,
-            isTS: false,
-            leftX: totalX - horizontalLength/2,
-            rightX: totalX + horizontalLength/2
-          });
-          
-          totalX += horizontalLength * 2; // More space between stable states
-        } else {
-          // For transition states, position between the previous and next points
-          points.push({
-            x: totalX,
-            y: y,
-            energy: data[i].energy,
-            name: data[i].name,
-            isTS: true,
-            leftX: totalX,
-            rightX: totalX
-          });
-          
-          totalX += horizontalLength; // Less space after transition states
-        }
+        // All points (including transition states) get the same treatment
+        points.push({
+          x: totalX,
+          y: y,
+          energy: data[i].energy,
+          name: data[i].name,
+          isTS: data[i].transitionState,
+          leftX: totalX - horizontalLength/2,
+          rightX: totalX + horizontalLength/2
+        });
+        
+        // Space between points
+        totalX += horizontalLength * 2;
       }
       
       // Clear canvas
@@ -202,94 +188,41 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
       
       ctx.setLineDash([]);
       
-      // Draw the energy profile diagram with PyEnergyDiagrams style
-      // First, draw all connecting lines
-      for (let i = 0; i < points.length - 1; i++) {
-        ctx.beginPath();
-        ctx.strokeStyle = colors.line;
-        ctx.lineWidth = lineWidth;
-        
-        const current = points[i];
-        const next = points[i + 1];
-        
-        if (!current.isTS) {
-          // Draw horizontal line for stable state
-          ctx.moveTo(current.leftX, current.y);
-          ctx.lineTo(current.rightX, current.y);
-        }
-        
-        // Draw connecting line to the next point
-        ctx.moveTo(current.rightX, current.y);
-        
-        if (next.isTS) {
-          // Direct line to transition state
-          ctx.lineTo(next.x, next.y);
-        } else {
-          // Direct line to the left side of next stable state
-          ctx.lineTo(next.leftX, next.y);
-        }
-        
-        ctx.stroke();
-      }
-      
-      // Draw the last point's horizontal line if it's not a transition state
-      const lastPoint = points[points.length - 1];
-      if (!lastPoint.isTS) {
-        ctx.beginPath();
-        ctx.strokeStyle = colors.line;
-        ctx.lineWidth = lineWidth;
-        ctx.moveTo(lastPoint.leftX, lastPoint.y);
-        ctx.lineTo(lastPoint.rightX, lastPoint.y);
-        ctx.stroke();
-      }
-      
-      // Now draw all points on top of the lines
+      // Draw the energy profile diagram
+      // First, draw all horizontal lines for ALL points (both stable and transition states)
       for (let i = 0; i < points.length; i++) {
         const point = points[i];
         
-        // Draw different markers for transition states vs stable states
-        if (point.isTS) {
-          // Transition state - draw red X marker
-          ctx.fillStyle = colors.transitionState;
-          ctx.strokeStyle = colors.transitionState;
-          ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.strokeStyle = point.isTS ? colors.transitionState : colors.line;
+        ctx.lineWidth = lineWidth;
+        
+        // Draw horizontal line for every point
+        ctx.moveTo(point.leftX, point.y);
+        ctx.lineTo(point.rightX, point.y);
+        ctx.stroke();
+        
+        // Draw connecting lines between points
+        if (i < points.length - 1) {
+          const nextPoint = points[i + 1];
           
-          // Draw X marker
-          const markerSize = 6;
           ctx.beginPath();
-          ctx.moveTo(point.x - markerSize, point.y - markerSize);
-          ctx.lineTo(point.x + markerSize, point.y + markerSize);
+          ctx.strokeStyle = colors.line;
+          ctx.moveTo(point.rightX, point.y);
+          ctx.lineTo(nextPoint.leftX, nextPoint.y);
           ctx.stroke();
-          
-          ctx.beginPath();
-          ctx.moveTo(point.x - markerSize, point.y + markerSize);
-          ctx.lineTo(point.x + markerSize, point.y - markerSize);
-          ctx.stroke();
-          
-          // Draw name above the point for transition states
-          ctx.fillStyle = colors.text;
-          ctx.textAlign = 'center';
-          ctx.font = `${fontSize}px Arial`;
-          ctx.fillText(point.name, point.x, point.y - 12);
-          
-          // Draw energy value below the point
-          ctx.fillText(point.energy.toFixed(1) + " " + energyUnit, point.x, point.y + 20);
-        } else {
-          // Stable state - draw filled circle
-          ctx.fillStyle = colors.point;
-          ctx.beginPath();
-          ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
-          ctx.fill();
-          
-          // Draw name below the point for stable states
-          ctx.fillStyle = colors.text;
-          ctx.textAlign = 'center';
-          ctx.font = `${fontSize}px Arial`;
-          ctx.fillText(point.name, point.x, point.y + 20);
-          
-          // Draw energy value above the point
-          ctx.fillText(point.energy.toFixed(1) + " " + energyUnit, point.x, point.y - 12);
         }
+        
+        // Draw labels for all points
+        ctx.fillStyle = colors.text;
+        ctx.textAlign = 'center';
+        ctx.font = `${fontSize}px Arial`;
+        
+        // Name below the point
+        ctx.fillText(point.name, point.x, point.y + 20);
+        
+        // Energy value above the point
+        ctx.fillText(point.energy.toFixed(1) + " " + energyUnit, point.x, point.y - 12);
       }
       
       // Draw dotted reference line at zero if within the energy range
@@ -305,7 +238,7 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
         ctx.setLineDash([]);
       }
       
-      console.log(`Energy diagram ${canvasId} created successfully in PyEnergyDiagrams style`);
+      console.log(`Energy diagram ${canvasId} created successfully with custom styling`);
     } catch (error) {
       console.error("Failed to create energy diagram:", error);
     }
