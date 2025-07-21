@@ -1,6 +1,7 @@
 ---
 // EnergyDiagram.astro - Energy profile diagram component for Astro
 
+
 interface EnergyPoint {
   name: string;
   energy: number;
@@ -24,6 +25,7 @@ interface Props {
   };
   fontSize?: number;
   lineWidth?: number;
+  horizontalLength?: number;
 }
 
 const {
@@ -43,6 +45,7 @@ const {
   },
   fontSize = 14,
   lineWidth = 2,
+  horizontalLength = 40,
 } = Astro.props;
 
 // Generate a unique ID for the canvas element
@@ -53,7 +56,7 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
   <canvas id={canvasId} width={width} height={height}></canvas>
 </div>
 
-<script define:vars={{ data, canvasId, title, yLabel, xLabel, energyUnit, colors, fontSize, lineWidth, width, height }}>
+<script define:vars={{ data, canvasId, title, yLabel, xLabel, energyUnit, colors, fontSize, lineWidth, width, height, horizontalLength }}>
   // Function to draw the energy diagram
   function drawEnergyDiagram() {
     try {
@@ -74,7 +77,7 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
       // Calculate margins and plot area dimensions
       const margin = {
         top: 50,
-        right: 50,
+        right: 60,
         bottom: 70,
         left: 80
       };
@@ -87,20 +90,51 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
       const maxEnergy = Math.max(...energies);
       const energyRange = maxEnergy - minEnergy;
       
-      // Add 10% padding to energy range
-      const paddedMinEnergy = minEnergy - (energyRange * 0.1);
-      const paddedMaxEnergy = maxEnergy + (energyRange * 0.1);
+      // Add 15% padding to energy range for better visualization
+      const paddedMinEnergy = minEnergy - (energyRange * 0.15);
+      const paddedMaxEnergy = maxEnergy + (energyRange * 0.15);
       
       // Function to convert energy value to Y coordinate
       const energyToY = (energy) => {
         return margin.top + plotHeight - ((energy - paddedMinEnergy) / (paddedMaxEnergy - paddedMinEnergy) * plotHeight);
       };
       
-      // Function to calculate X coordinate based on index
-      const indexToX = (index) => {
-        const segmentWidth = plotWidth / (data.length - 1);
-        return margin.left + (index * segmentWidth);
-      };
+      // Calculate X coordinates for each point
+      // This is more complex for PyEnergyDiagrams style with horizontal segments
+      const points = [];
+      let totalX = margin.left;
+      
+      for (let i = 0; i < data.length; i++) {
+        const y = energyToY(data[i].energy);
+        
+        // For transition states, we don't add horizontal segments
+        if (!data[i].transitionState) {
+          points.push({
+            x: totalX,
+            y: y,
+            energy: data[i].energy,
+            name: data[i].name,
+            isTS: false,
+            leftX: totalX - horizontalLength/2,
+            rightX: totalX + horizontalLength/2
+          });
+          
+          totalX += horizontalLength * 2; // More space between stable states
+        } else {
+          // For transition states, position between the previous and next points
+          points.push({
+            x: totalX,
+            y: y,
+            energy: data[i].energy,
+            name: data[i].name,
+            isTS: true,
+            leftX: totalX,
+            rightX: totalX
+          });
+          
+          totalX += horizontalLength; // Less space after transition states
+        }
+      }
       
       // Clear canvas
       ctx.fillStyle = colors.background;
@@ -108,7 +142,7 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
       
       // Draw title
       ctx.fillStyle = colors.text;
-      ctx.font = `bold ${fontSize + 4}px Arial`;
+      ctx.font = `bold ${fontSize + 6}px Arial`;
       ctx.textAlign = 'center';
       ctx.fillText(title, width / 2, margin.top / 2);
       
@@ -131,12 +165,13 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
       ctx.translate(margin.left / 3, height / 2);
       ctx.rotate(-Math.PI / 2);
       ctx.textAlign = 'center';
-      ctx.font = `${fontSize}px Arial`;
+      ctx.font = `${fontSize + 2}px Arial`;
       ctx.fillText(`${yLabel} (${energyUnit})`, 0, 0);
       ctx.restore();
       
       // Draw x-axis label
       ctx.textAlign = 'center';
+      ctx.font = `${fontSize + 2}px Arial`;
       ctx.fillText(xLabel, width / 2, height - margin.bottom / 3);
       
       // Draw grid lines
@@ -159,6 +194,7 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
         // Draw y-axis tick label
         ctx.fillStyle = colors.text;
         ctx.textAlign = 'right';
+        ctx.font = `${fontSize}px Arial`;
         ctx.fillText(tickValue.toFixed(1), margin.left - 10, yPos + 4);
         
         tickValue += energyStep;
@@ -166,95 +202,110 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
       
       ctx.setLineDash([]);
       
-      // Draw the energy profile diagram with connecting lines
-      for (let i = 0; i < data.length - 1; i++) {
-        const x1 = indexToX(i);
-        const y1 = energyToY(data[i].energy);
-        const x2 = indexToX(i + 1);
-        const y2 = energyToY(data[i + 1].energy);
-        
-        // Draw point (circle for stable states, triangle for transition states)
-        ctx.fillStyle = data[i].transitionState ? colors.transitionState : colors.point;
-        ctx.beginPath();
-        
-        if (data[i].transitionState) {
-          // Draw triangle for transition state
-          const triangleSize = 8;
-          ctx.moveTo(x1, y1 - triangleSize);
-          ctx.lineTo(x1 - triangleSize, y1 + triangleSize);
-          ctx.lineTo(x1 + triangleSize, y1 + triangleSize);
-          ctx.closePath();
-        } else {
-          // Draw circle for stable state
-          ctx.arc(x1, y1, 6, 0, Math.PI * 2);
-        }
-        
-        ctx.fill();
-        
-        // Draw point label
-        ctx.fillStyle = colors.text;
-        ctx.textAlign = 'center';
-        ctx.fillText(data[i].name, x1, y1 + (data[i].transitionState ? 30 : 20));
-        ctx.fillText(data[i].energy.toFixed(1) + " " + energyUnit, x1, y1 - 15);
-        
-        // Draw line connecting points
+      // Draw the energy profile diagram with PyEnergyDiagrams style
+      // First, draw all connecting lines
+      for (let i = 0; i < points.length - 1; i++) {
         ctx.beginPath();
         ctx.strokeStyle = colors.line;
         ctx.lineWidth = lineWidth;
-        ctx.moveTo(x1, y1);
         
-        // Draw direct diagonal line between points
-        ctx.lineTo(x2, y2);
+        const current = points[i];
+        const next = points[i + 1];
+        
+        if (!current.isTS) {
+          // Draw horizontal line for stable state
+          ctx.moveTo(current.leftX, current.y);
+          ctx.lineTo(current.rightX, current.y);
+        }
+        
+        // Draw connecting line to the next point
+        ctx.moveTo(current.rightX, current.y);
+        
+        if (next.isTS) {
+          // Direct line to transition state
+          ctx.lineTo(next.x, next.y);
+        } else {
+          // Direct line to the left side of next stable state
+          ctx.lineTo(next.leftX, next.y);
+        }
+        
         ctx.stroke();
       }
       
-      // Draw the last point
-      const lastIndex = data.length - 1;
-      const lastX = indexToX(lastIndex);
-      const lastY = energyToY(data[lastIndex].energy);
-      
-      ctx.fillStyle = data[lastIndex].transitionState ? colors.transitionState : colors.point;
-      ctx.beginPath();
-      
-      if (data[lastIndex].transitionState) {
-        // Draw triangle for transition state
-        const triangleSize = 8;
-        ctx.moveTo(lastX, lastY - triangleSize);
-        ctx.lineTo(lastX - triangleSize, lastY + triangleSize);
-        ctx.lineTo(lastX + triangleSize, lastY + triangleSize);
-        ctx.closePath();
-      } else {
-        // Draw circle for stable state
-        ctx.arc(lastX, lastY, 6, 0, Math.PI * 2);
-      }
-      
-      ctx.fill();
-      
-      // Draw last point label
-      ctx.fillStyle = colors.text;
-      ctx.textAlign = 'center';
-      ctx.fillText(data[lastIndex].name, lastX, lastY + (data[lastIndex].transitionState ? 30 : 20));
-      ctx.fillText(data[lastIndex].energy.toFixed(1) + " " + energyUnit, lastX, lastY - 15);
-      
-      // Draw x-axis tick marks and labels
-      for (let i = 0; i < data.length; i++) {
-        const x = indexToX(i);
-        
-        // Draw tick mark
+      // Draw the last point's horizontal line if it's not a transition state
+      const lastPoint = points[points.length - 1];
+      if (!lastPoint.isTS) {
         ctx.beginPath();
-        ctx.strokeStyle = colors.text;
-        ctx.lineWidth = 1;
-        ctx.moveTo(x, height - margin.bottom);
-        ctx.lineTo(x, height - margin.bottom + 5);
+        ctx.strokeStyle = colors.line;
+        ctx.lineWidth = lineWidth;
+        ctx.moveTo(lastPoint.leftX, lastPoint.y);
+        ctx.lineTo(lastPoint.rightX, lastPoint.y);
         ctx.stroke();
-        
-        // Draw abbreviated reaction step number
-        ctx.fillStyle = colors.text;
-        ctx.textAlign = 'center';
-        ctx.fillText(i + 1, x, height - margin.bottom + 20);
       }
       
-      console.log(`Energy diagram ${canvasId} created successfully`);
+      // Now draw all points on top of the lines
+      for (let i = 0; i < points.length; i++) {
+        const point = points[i];
+        
+        // Draw different markers for transition states vs stable states
+        if (point.isTS) {
+          // Transition state - draw red X marker
+          ctx.fillStyle = colors.transitionState;
+          ctx.strokeStyle = colors.transitionState;
+          ctx.lineWidth = 2;
+          
+          // Draw X marker
+          const markerSize = 6;
+          ctx.beginPath();
+          ctx.moveTo(point.x - markerSize, point.y - markerSize);
+          ctx.lineTo(point.x + markerSize, point.y + markerSize);
+          ctx.stroke();
+          
+          ctx.beginPath();
+          ctx.moveTo(point.x - markerSize, point.y + markerSize);
+          ctx.lineTo(point.x + markerSize, point.y - markerSize);
+          ctx.stroke();
+          
+          // Draw name above the point for transition states
+          ctx.fillStyle = colors.text;
+          ctx.textAlign = 'center';
+          ctx.font = `${fontSize}px Arial`;
+          ctx.fillText(point.name, point.x, point.y - 12);
+          
+          // Draw energy value below the point
+          ctx.fillText(point.energy.toFixed(1) + " " + energyUnit, point.x, point.y + 20);
+        } else {
+          // Stable state - draw filled circle
+          ctx.fillStyle = colors.point;
+          ctx.beginPath();
+          ctx.arc(point.x, point.y, 5, 0, Math.PI * 2);
+          ctx.fill();
+          
+          // Draw name below the point for stable states
+          ctx.fillStyle = colors.text;
+          ctx.textAlign = 'center';
+          ctx.font = `${fontSize}px Arial`;
+          ctx.fillText(point.name, point.x, point.y + 20);
+          
+          // Draw energy value above the point
+          ctx.fillText(point.energy.toFixed(1) + " " + energyUnit, point.x, point.y - 12);
+        }
+      }
+      
+      // Draw dotted reference line at zero if within the energy range
+      if (paddedMinEnergy < 0 && paddedMaxEnergy > 0) {
+        const zeroY = energyToY(0);
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(0, 0, 0, 0.3)';
+        ctx.lineWidth = 1;
+        ctx.setLineDash([2, 2]);
+        ctx.moveTo(margin.left, zeroY);
+        ctx.lineTo(width - margin.right, zeroY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+      
+      console.log(`Energy diagram ${canvasId} created successfully in PyEnergyDiagrams style`);
     } catch (error) {
       console.error("Failed to create energy diagram:", error);
     }
@@ -285,32 +336,31 @@ const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
 
   // But also ensure it runs on DOMContentLoaded as a fallback
   document.addEventListener('DOMContentLoaded', function() {
-    console.log(`DOMContentLoaded event fired, ensuring diagram ${canvasId} is drawn`);
     // Wait a moment to ensure all elements are fully rendered
     setTimeout(drawEnergyDiagram, 10);
   });
 
   // Add a window load event as a final fallback
   window.addEventListener('load', function() {
-    console.log(`Window load event fired, ensuring diagram ${canvasId} is drawn`);
     // Wait a moment to ensure all elements are fully rendered
     setTimeout(drawEnergyDiagram, 50);
   });
 
   // Add resize handler
   window.addEventListener('resize', function() {
-    console.log(`Window resize event detected, redrawing diagram ${canvasId}`);
     drawEnergyDiagram();
   });
 </script>
 
 <style>
   .energy-diagram-container {
-    margin: 1rem 0;
+    margin: 1rem auto;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     padding: 16px;
     background-color: white;
+    display: flex;
+    justify-content: center;
   }
 
   /* Ensure canvas is responsive */
