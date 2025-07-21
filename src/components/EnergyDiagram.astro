@@ -51,14 +51,29 @@ const chartId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
   <canvas id={chartId}></canvas>
 </div>
 
+<!-- Load Chart.js from CDN using the traditional script tag -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
 <script define:vars={{ data, chartId, title, yLabel, xLabel, energyUnit, colors, fontSize }}>
-  // Import Chart.js from CDN
-  import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm')
-    .then((module) => {
-      const Chart = module.default;
+  document.addEventListener('DOMContentLoaded', () => {
+    try {
+      if (!Chart) {
+        console.error('Chart.js is not loaded properly');
+        return;
+      }
       
-      // Setup Chart.js
-      const ctx = document.getElementById(chartId).getContext('2d');
+      // Get the canvas context
+      const canvas = document.getElementById(chartId);
+      if (!canvas) {
+        console.error(`Canvas element with id ${chartId} not found`);
+        return;
+      }
+      
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        console.error('Could not get 2D context from canvas');
+        return;
+      }
       
       // Prepare data for Chart.js
       const labels = data.map(point => point.name);
@@ -159,8 +174,11 @@ const chartId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
           }
         }
       });
-    })
-    .catch(console.error);
+      console.log("Energy diagram created successfully");
+    } catch (error) {
+      console.error("Failed to create energy diagram:", error);
+    }
+  });
 </script>
 
 <style>
