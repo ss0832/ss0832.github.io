@@ -1,0 +1,174 @@
+---
+// EnergyDiagram.astro - Energy profile diagram component for Astro
+
+interface EnergyPoint {
+  name: string;
+  energy: number;
+  transitionState?: boolean;
+}
+
+interface Props {
+  data: EnergyPoint[];
+  width?: number;
+  height?: number;
+  title?: string;
+  yLabel?: string;
+  xLabel?: string;
+  energyUnit?: string;
+  colors?: {
+    line?: string;
+    point?: string;
+    text?: string;
+    transitionState?: string;
+    background?: string;
+  };
+  fontSize?: number;
+}
+
+const {
+  data,
+  width = 800,
+  height = 500,
+  title = "Energy Profile Diagram",
+  yLabel = "Energy",
+  xLabel = "Reaction Coordinate",
+  energyUnit = "kcal/mol",
+  colors = {
+    line: "#0066CC",
+    point: "#0066CC",
+    text: "#333333",
+    transitionState: "#CC0000",
+    background: "#FFFFFF",
+  },
+  fontSize = 14,
+} = Astro.props;
+
+// Generate a unique ID for the canvas element to avoid conflicts if multiple charts are used
+const chartId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
+---
+
+<div class="energy-diagram-container" style={`width: ${width}px; height: ${height}px;`}>
+  <canvas id={chartId}></canvas>
+</div>
+
+<script define:vars={{ data, chartId, title, yLabel, xLabel, energyUnit, colors, fontSize }}>
+  // Import Chart.js from CDN
+  import('https://cdn.jsdelivr.net/npm/chart.js@4.4.1/+esm')
+    .then((module) => {
+      const Chart = module.default;
+      
+      // Setup Chart.js
+      const ctx = document.getElementById(chartId).getContext('2d');
+      
+      // Prepare data for Chart.js
+      const labels = data.map(point => point.name);
+      const energies = data.map(point => point.energy);
+      const pointBackgroundColors = data.map(point => 
+        point.transitionState ? colors.transitionState : colors.point
+      );
+      
+      // Create chart
+      new Chart(ctx, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: `Energy (${energyUnit})`,
+            data: energies,
+            borderColor: colors.line,
+            backgroundColor: pointBackgroundColors,
+            borderWidth: 2,
+            pointRadius: 6,
+            pointStyle: data.map(point => point.transitionState ? 'triangle' : 'circle'),
+            tension: 0.1,
+            fill: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            title: {
+              display: !!title,
+              text: title,
+              font: {
+                size: fontSize + 4,
+                weight: 'bold'
+              },
+              color: colors.text,
+            },
+            legend: {
+              display: true,
+              position: 'top',
+              labels: {
+                color: colors.text,
+                font: {
+                  size: fontSize
+                }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: function(context) {
+                  return `${context.raw} ${energyUnit}`;
+                }
+              }
+            }
+          },
+          scales: {
+            x: {
+              title: {
+                display: true,
+                text: xLabel,
+                color: colors.text,
+                font: {
+                  size: fontSize
+                }
+              },
+              ticks: {
+                color: colors.text,
+                font: {
+                  size: fontSize - 2
+                }
+              },
+              grid: {
+                display: true,
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            },
+            y: {
+              title: {
+                display: true,
+                text: `${yLabel} (${energyUnit})`,
+                color: colors.text,
+                font: {
+                  size: fontSize
+                }
+              },
+              ticks: {
+                color: colors.text,
+                font: {
+                  size: fontSize - 2
+                }
+              },
+              grid: {
+                display: true,
+                color: 'rgba(0, 0, 0, 0.1)'
+              }
+            }
+          }
+        }
+      });
+    })
+    .catch(console.error);
+</script>
+
+<style>
+  .energy-diagram-container {
+    margin: 1rem 0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    background-color: white;
+  }
+</style>
