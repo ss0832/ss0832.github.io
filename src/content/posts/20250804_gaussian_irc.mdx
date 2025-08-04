@@ -1,0 +1,126 @@
+---
+title: "【Gaussian】Recommended Settings for Gaussian IRC Calculations: A Personal Reference"
+published: 2025-08-04
+description: "My preferred approach to IRC calculations in Gaussian with detailed explanation"
+tags: [Gaussian, IRC, Computational Chemistry, Transition States]
+category: Computational Chemistry
+draft: false
+---
+Last updated: 2025-08-04
+
+import MoleculeViewer from '../../components/MoleculeViewer.astro';
+
+## Overview
+
+This article describes my recommended settings for Intrinsic Reaction Coordinate (IRC) calculations in Gaussian, which I use as my personal "first choice" approach. IRC calculations are essential for verifying transition states by following the reaction path from the transition state to reactants and products.
+
+The example system used is a cycloaddition reaction transition state, but the settings can be applied to various reaction types.
+
+## My Preferred Gaussian IRC Settings
+
+```
+%mem=4GB
+%nprocshared=4
+#p irc=(calcfc,maxpoints=9999,recalc=10,lqa) hf/3-21g
+
+Title Card Required
+
+0 1
+ C                 -1.25830200   -0.01255100    0.00000600
+ C                 -0.98215300   -0.69535400    1.19814900
+ C                  0.98216500   -0.69536100    1.19813500
+ C                  1.25830200   -0.01255100   -0.00000600
+ C                  0.98215300   -0.69535600   -1.19814800
+ C                 -0.98216500   -0.69536300   -1.19813400
+ H                  1.17613600   -0.18283500    2.12419500
+ H                 -1.17610800   -0.18281900    2.12420700
+ H                 -1.19261300   -1.75054200    1.23731800
+ H                  1.17610800   -0.18282300   -2.12420600
+ H                  1.19261300   -1.75054400   -1.23731500
+ H                 -1.17613600   -0.18283900   -2.12419400
+ H                 -1.19262000   -1.75055300   -1.23729000
+ H                  1.19262000   -1.75055000    1.23729300
+ C                  0.85391800    1.40131500   -0.00000100
+ H                  1.16148000    1.93924200   -0.88484600
+ C                 -0.85391800    1.40131500   -0.00000200
+ H                 -1.16147900    1.93923100   -0.88485500
+ H                 -1.16148000    1.93924300    0.88484300
+ H                  1.16147900    1.93923200    0.88485100
+```
+
+<MoleculeViewer 
+  xyzData={`20
+Transition state structure
+ C                 -1.25830200   -0.01255100    0.00000600
+ C                 -0.98215300   -0.69535400    1.19814900
+ C                  0.98216500   -0.69536100    1.19813500
+ C                  1.25830200   -0.01255100   -0.00000600
+ C                  0.98215300   -0.69535600   -1.19814800
+ C                 -0.98216500   -0.69536300   -1.19813400
+ H                  1.17613600   -0.18283500    2.12419500
+ H                 -1.17610800   -0.18281900    2.12420700
+ H                 -1.19261300   -1.75054200    1.23731800
+ H                  1.17610800   -0.18282300   -2.12420600
+ H                  1.19261300   -1.75054400   -1.23731500
+ H                 -1.17613600   -0.18283900   -2.12419400
+ H                 -1.19262000   -1.75055300   -1.23729000
+ H                  1.19262000   -1.75055000    1.23729300
+ C                  0.85391800    1.40131500   -0.00000100
+ H                  1.16148000    1.93924200   -0.88484600
+ C                 -0.85391800    1.40131500   -0.00000200
+ H                 -1.16147900    1.93923100   -0.88485500
+ H                 -1.16148000    1.93924300    0.88484300
+ H                  1.16147900    1.93923200    0.88485100`}
+  caption="Transition state structure for a Diels-Alder reaction"
+  backgroundColor="#333333"
+/>
+
+## Detailed Explanation of IRC Parameters
+
+### IRC-Specific Keywords
+- `irc`: Initiates an IRC calculation
+- `calcfc`: Calculates force constants at the initial point (transition state) before starting the IRC
+- `maxpoints=9999`: Sets a high maximum number of points to ensure complete IRC paths
+- `recalc=10`: Recalculates the Hessian every 10 points to maintain accuracy
+- `lqa`: Uses the Local Quadratic Approximation algorithm, which is generally more robust than the default
+
+## Why These Settings Work Well
+
+### The calcfc Option
+Starting with an accurate Hessian is crucial for IRC calculations. The `calcfc` option ensures that force constants are calculated at the transition state, providing a reliable starting point for following the reaction path.
+
+### High maxpoints Value
+IRC calculations can sometimes require many points to reach minima, especially for complex reactions or flat potential energy surfaces. Setting `maxpoints=9999` prevents premature termination, though most calculations will complete with far fewer points.
+
+### Regular Hessian Recalculation
+The `recalc=10` option strikes a balance between accuracy and efficiency. Recalculating the Hessian:
+- Prevents accumulation of numerical errors
+- Helps navigate complex regions of the potential energy surface
+- Improves convergence in difficult cases
+
+### LQA Algorithm
+The Local Quadratic Approximation algorithm often provides more stable IRC paths than the default Gonzalez-Schlegel method, especially for reactions with complex potential energy surfaces.
+
+## Analysis of IRC Results
+
+After performing an IRC calculation, I typically analyze:
+
+1. **Connectivity of endpoints**: Do they match expected reactants and products?
+2. **Energy profile**: Is there a smooth descent from the transition state to the minima?
+3. **Structural changes**: How do key bonds and angles change along the reaction path?
+
+The example shown here is a Diels-Alder cycloaddition reaction transition state. A successful IRC calculation would show the path connecting the separated diene and dienophile to the cycloadduct product.
+
+
+## Conclusion
+
+The IRC settings outlined in this post provide a robust starting point for most reaction path calculations. The combination of `calcfc`, regular Hessian recalculation, and the LQA algorithm offers a good balance between reliability and computational efficiency.
+
+
+## References
+
+- Fukui, K. "The path of chemical reactions - the IRC approach." *Acc. Chem. Res.* 1981, 14, 363-368.
+- Gonzalez, C.; Schlegel, H. B. "Reaction path following in mass-weighted internal coordinates." *J. Phys. Chem.* 1990, 94, 5523-5527.
+- Hratchian, H. P.; Schlegel, H. B. "Finding minima, transition states, and following reaction pathways on ab initio potential energy surfaces." *Theory and Applications of Computational Chemistry: The First 40 Years*, 2005, 195-249.
+- Gaussian 16 User's Reference: https://gaussian.com/irc/
+- Ess, D. H. et al. "How Do Hessians and Step Sizes Impact the Efficiency and Accuracy of IRC Calculations?" *J. Phys. Chem. A* 2021, 125, 1266-1276.
