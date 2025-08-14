@@ -1173,7 +1173,7 @@ Normal mode                   x         y         z            x         y      
 ```
 その結果、虚振動が１つであることが確認できた。
 
-次に、`vibration_animation`内の`mode_1_530i_wave_number.xyz`をAvogadroで確認すると、想定される反応系と生成系をつなぐ方向に振動していることを確認できた。
+次に、`vibration_animation`内の`mode_1_927i_wave_number.xyz`をAvogadroで確認すると、想定される反応系と生成系をつなぐ方向に振動していることを確認できた。
 
 しかしながら、併進と回転成分を取り除いたHessianを対角化して得られた固有値の数が3N-7個(Nは原子数)となっている。プログラムの仕様上絶対値が10の-7乗以下の固有値は表示しないようにしているため、一概には言えないが、これは1方向の振動成分だけ変曲点となってしまっていると考えられる。遷移状態構造の数学上の定義では、Hessianの対角化の結果得られる基準座標軸の振動成分の3N-7個の固有値が正で、それ以外の1つの振動基準座標軸の固有値が負であるため、この構造は遷移状態構造ではない可能性がある。
 
@@ -1248,3 +1248,4 @@ EIGENVALUES (NORMAL COORDINATE, NUMBER OF VALUES: 287):
 - In _Classical and Quantum Dynamics in Condensed Phase Simulations_; WORLD SCIENTIFIC: LERICI, Villa Marigola, 1998; pp 385–404.
 - _The Journal of Chemical Physics_, 2020, 153, 024109.
 - _The Journal of Chemical Physics_, 2022, 144, 214108.
+
