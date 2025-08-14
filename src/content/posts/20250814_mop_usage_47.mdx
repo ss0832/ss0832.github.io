@@ -195,6 +195,7 @@ python .\optmain.py .\9_bbn.xyz -opt rsirfo_fsb -ma 50 19 21 100 3 22 50,200 4 2
 - `-spin`はスピン多重度の指定である。PySCFを使用するときは目的とするスピン多重度に1を引いた値を指定する。（デフォルトでは1が指定される。）
 - `-elec M`は形式電荷をMとすることを示す。（デフォルトでは0が指定される。）
 - `-ma yyy a b `はyyykJ/molの活性化障壁を超えうるペア同士を近づける力を原子のラベル番号aとbのペアに構造最適化時に加えることを示す。
+- `-ma yyy,zzz a b`は反復計算の回数が増えるごとに徐々にyyykJ/molからzzzkJ/molまで加える力を変化させて(300回目の反復計算でzzzkj/molになる)原子のラベル番号aとbのペアに力を加えるオプションである。
 - `-os uma-s-1p1`は今回使用するNNPを指定している。これを使用する際にASEライブラリが必要である。
 
 これを実行すると、`omol`のデータセットを使用した`uma-s-1p1`モデルのNNPで得たエネルギーに対して、指定した人工力ポテンシャルを加えた上で初期構造を構造最適化することができる。
@@ -711,3 +712,4 @@ Normal mode                   x         y         z            x         y      
 - In _Classical and Quantum Dynamics in Condensed Phase Simulations_; WORLD SCIENTIFIC: LERICI, Villa Marigola, 1998; pp 385–404.
 - _The Journal of Chemical Physics_, 2020, 153, 024109.
 - _The Journal of Chemical Physics_, 2022, 144, 214108.
+
