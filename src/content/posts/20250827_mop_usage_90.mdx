@@ -6,14 +6,14 @@ tags: [MultiOptPy, python]
 category: Computational Chemistry
 draft: false
 ---
-最終更新：2025-08-27
+最終更新：2025-08-28
 
 import MoleculeViewer from '../../components/MoleculeViewer.astro';
 import MultiDataGraph from '../../components/MultiDataGraph.astro';
 
 ## 概要
 
-本記事では、自作モジュール(MultiOptPy)で、アルキンへのヒドロホウ素化 (ホウ素化試薬:bis(pinacolato)diboron, 実際に試薬として使われている例が私の観測範囲では見当たらなかったため、コンピュータ上で反応性を予測するのに適当な例と考えられる。)の遷移状態構造を算出してみる。使用する計算レベルは、Meta社のFAIR Chemistryが開発したニューラルネットワークポテンシャル(NNP)であるUMA(Meta’s Universal Model for Atoms)を使用する。
+本記事では、自作モジュール(MultiOptPy)で、アルキンへのヒドロホウ素化 (ホウ素化試薬:bis(pinacolato)diboron)の遷移状態構造を算出してみる。使用する計算レベルは、Meta社のFAIR Chemistryが開発したニューラルネットワークポテンシャル(NNP)であるUMA(Meta’s Universal Model for Atoms)を使用する。
 
 MultiOptPyは電子状態計算ソフトウェアを用いた分子構造最適化手法の勉強を目的として作成したpythonモジュールである。
 
@@ -487,4 +487,5 @@ Normal mode                   x         y         z            x         y      
 - In _Classical and Quantum Dynamics in Condensed Phase Simulations_; WORLD SCIENTIFIC: LERICI, Villa Marigola, 1998; pp 385–404.
 - _The Journal of Chemical Physics_, 2020, 153, 024109.
 - _The Journal of Chemical Physics_, 2022, 144, 214108.
+
 
