@@ -1,0 +1,37 @@
+---
+import { getCollection } from 'astro:content'
+import MonthArchiveFilter from '../../components/MonthArchiveFilter.astro'
+
+const posts = await getCollection('posts', ({ data }) => !data.draft)
+const sorted = posts.sort(
+  (a, b) =>
+    new Date(b.data.published).getTime() - new Date(a.data.published).getTime(),
+)
+---
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Blog</title>
+  </head>
+  <body>
+    <h1>Blog</h1>
+    <MonthArchiveFilter />
+    <section style="margin-top:2rem;">
+      <h2>All Posts</h2>
+      <ul>
+        {sorted.map(p => {
+          const d = new Date(p.data.published);
+            const dateStr = d.toISOString().split('T')[0];
+            return (
+              <li>
+                <span>{dateStr}</span>
+                <a href={`/posts/${p.slug}/`}>{p.data.title as string}</a>
+              </li>
+            );
+        })}
+      </ul>
+    </section>
+  </body>
+</html>

@@ -2,55 +2,55 @@
 // EnergyDiagram.astro - Energy profile diagram component for Astro
 
 interface EnergyPoint {
-  name: string;
-  energy: number;
-  transitionState?: boolean;
+  name: string
+  energy: number
+  transitionState?: boolean
 }
 
 interface Props {
-  data: EnergyPoint[];
-  width?: number;
-  height?: number;
-  title?: string;
-  yLabel?: string;
-  xLabel?: string;
-  energyUnit?: string;
+  data: EnergyPoint[]
+  width?: number
+  height?: number
+  title?: string
+  yLabel?: string
+  xLabel?: string
+  energyUnit?: string
   colors?: {
-    line?: string;
-    point?: string;
-    text?: string;
-    transitionState?: string;
-    background?: string;
-  };
-  fontSize?: number;
-  lineWidth?: number;
-  horizontalLength?: number;
-  leftMargin?: number;
+    line?: string
+    point?: string
+    text?: string
+    transitionState?: string
+    background?: string
+  }
+  fontSize?: number
+  lineWidth?: number
+  horizontalLength?: number
+  leftMargin?: number
 }
 
 const {
   data,
   width = 800,
   height = 500,
-  title = "Energy Profile Diagram",
-  yLabel = "Energy",
-  xLabel = "Reaction Coordinate",
-  energyUnit = "kcal/mol",
+  title = 'Energy Profile Diagram',
+  yLabel = 'Energy',
+  xLabel = 'Reaction Coordinate',
+  energyUnit = 'kcal/mol',
   colors = {
-    line: "#0066CC",
-    point: "#0066CC",
-    text: "#333333",
-    transitionState: "#CC0000",
-    background: "#FFFFFF",
+    line: '#0066CC',
+    point: '#0066CC',
+    text: '#333333',
+    transitionState: '#CC0000',
+    background: '#FFFFFF',
   },
   fontSize = 14,
   lineWidth = 2,
   horizontalLength = 40,
   leftMargin = 120, // Increased left margin for more space
-} = Astro.props;
+} = Astro.props
 
 // Generate a unique ID for the canvas element
-const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`;
+const canvasId = `energy-diagram-${Math.random().toString(36).substring(2, 9)}`
 ---
 
 <div class="energy-diagram-container" style={`width: ${width}px; height: ${height}px;`}>

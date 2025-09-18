@@ -1,0 +1,90 @@
+---
+import { getCollection } from 'astro:content'
+import { groupPostsByYearMonth } from '../lib/groupByYearMonth'
+
+interface PostLite {
+  title: string
+  slug: string
+  date: string // ISO
+}
+
+const postsFull = await getCollection('posts', ({ data }) => !data.draft)
+const counts = groupPostsByYearMonth(postsFull)
+
+const posts: PostLite[] = postsFull
+  .map(p => ({
+    title: p.data.title as string,
+    slug: p.slug,
+    date: new Date(p.data.published).toISOString(),
+  }))
+  .sort((a, b) => b.date.localeCompare(a.date))
+---
+<section class="month-archive-filter" data-has-js="">
+  <h2>Archive</h2>
+  <ul class="month-list" id="month-list">
+    {counts.map(item => (
+      <li>
+        <button type="button" class="month-btn" data-year={item.year} data-month={item.month} aria-pressed="false">
+          {item.year}-{item.month} ({item.count})
+        </button>
+      </li>
+    ))}
+    <li>
+      <button type="button" class="month-btn reset" data-reset="all" aria-pressed="true">All</button>
+    </li>
+  </ul>
+
+  <div class="filtered-posts" id="filtered-posts" data-mode="all">
+    <ul id="post-list">
+      {posts.map(p => {
+        const dateStr = p.date.split("T")[0];
+        return (
+          <li class="post-item" data-date={p.date} data-year={p.date.slice(0,4)} data-month={p.date.slice(5,7)}>
+            <span class="post-date">{dateStr}</span>
+            <a href={`/posts/${p.slug}/`}>{p.title}</a>
+          </li>
+        );
+      })}
+    </ul>
+  </div>
+</section>
+
+<script>
+  const buttons = Array.from(document.querySelectorAll('.month-btn'));
+  const items = Array.from(document.querySelectorAll('#post-list .post-item'));
+
+  function setActive(btn) {
+    buttons.forEach(b => b.setAttribute('aria-pressed', 'false'));
+    btn.setAttribute('aria-pressed', 'true');
+  }
+  function filterAll() { items.forEach(li => (li.style.display = '')); }
+  function filterYM(year, month) {
+    items.forEach(li => {
+      const y = li.getAttribute('data-year');
+      const m = li.getAttribute('data-month');
+      li.style.display = (y === year && m === month) ? '' : 'none';
+    });
+  }
+  buttons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      setActive(btn);
+      if (btn.dataset.reset === 'all') { filterAll(); }
+      else { filterYM(btn.dataset.year, btn.dataset.month); }
+    });
+  });
+</script>
+
+<style>
+.month-archive-filter { border: 1px solid var(--archive-border, #ddd); padding: 0.75rem 0.9rem; border-radius: 6px; background: var(--archive-bg, #fafafa); }
+.month-archive-filter h2 { margin: 0 0 0.6rem; font-size: 1.1rem; }
+.month-archive-filter .month-list { list-style: none; padding: 0; margin: 0 0 0.75rem; display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.month-archive-filter .month-btn { cursor: pointer; background: #fff; border: 1px solid #bbb; padding: 0.25rem 0.55rem; font-size: 0.75rem; line-height: 1; border-radius: 4px; transition: background 0.15s, color 0.15s, border-color 0.15s; }
+.month-archive-filter .month-btn[aria-pressed="true"] { background: #333; color: #fff; border-color: #333; }
+.month-archive-filter .month-btn:hover { border-color: #555; }
+.month-archive-filter .month-btn.reset { font-weight: 600; }
+.filtered-posts ul { list-style: none; padding: 0; margin: 0; }
+.filtered-posts li { margin: 0.35rem 0; display: flex; gap: 0.5rem; align-items: baseline; }
+.filtered-posts a { text-decoration: none; }
+.filtered-posts a:hover { text-decoration: underline; }
+.post-date { font-size: 0.7rem; opacity: 0.65; }
+</style>

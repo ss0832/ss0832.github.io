@@ -1,0 +1,28 @@
+---
+import { getCollection } from 'astro:content'
+import { groupPostsByYearMonth } from '../lib/groupByYearMonth'
+
+const posts = await getCollection('posts', ({ data }) => !data.draft)
+const counts = groupPostsByYearMonth(posts)
+---
+
+<section class="month-archive-counts">
+  <h2>Archive</h2>
+  <ul>
+    {counts.map(item => (
+      <li>
+        <span class="ym">{item.year}-{item.month}</span>
+        <span class="count">({item.count})</span>
+      </li>
+    ))}
+  </ul>
+</section>
+
+<style>
+.month-archive-counts { font-size: 0.95rem; line-height: 1.4; }
+.month-archive-counts h2 { margin: 0 0 0.6rem; font-size: 1.15rem; }
+.month-archive-counts ul { list-style: none; padding: 0; margin: 0; }
+.month-archive-counts li { margin: 0.2rem 0; display: flex; gap: 0.35rem; }
+.month-archive-counts .ym { font-variant-numeric: tabular-nums; }
+.month-archive-counts .count { opacity: 0.75; }
+</style>
