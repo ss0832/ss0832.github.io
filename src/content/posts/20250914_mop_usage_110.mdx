@@ -76,24 +76,24 @@ pip install fairchem-core==2.2.0 ase==3.25.0 torch==2.6.0
 次に、NNPを使用するために必要なModelの情報が保存されている`.pt`ファイルのダウンロードおよびNNPの自作ライブラリへの導入方法について説明する。
 
 
-1, 以下のサイトにアクセスして、`uma-s-1p1.pt`をダウンロードする。（使用許諾が下りていれば可能である。）
+1, 以下のサイトにアクセスして、`uma-s-1.pt`をダウンロードする。（使用許諾が下りていれば可能である。）
 ```
 https://huggingface.co/facebook/UMA
 ```
 
-2, ダウンロード後、`MultiOptPy-v1.15.3`ディレクトリ内に存在する`software_path.conf`に対して、`uma-s-1p1.pt`の絶対パスを用いて以下を追記する。
+2, ダウンロード後、`MultiOptPy-v1.15.3`ディレクトリ内に存在する`software_path.conf`に対して、`uma-s-1.pt`の絶対パスを用いて以下を追記する。
 ```
-uma-s-1p1::(uma-s-1p1.ptの絶対パス)
+uma-s-1::(uma-s-1.ptの絶対パス)
 ```
 
-これで、`MultiOptPy-v1.15.3`がNNP`uma-s-1p1`を使用できるようになる。
+これで、`MultiOptPy-v1.15.3`がNNP`uma-s-1`を使用できるようになる。
 
 
 ### 使用するNNPに関する具体的な説明
 
 今回使用するNNPについて具体的に説明する。
 
-- UMAのModel Checkpointは`uma-s-1p1`を使用した。
+- UMAのModel Checkpointは`uma-s-1`を使用した。
 - 小分子系のトレーニングセットである`Omol25`(`omol`)を使用して学習したニューラルネットワークポテンシャルを使用する。
 
 ※自作ライブラリでの具体的な使用の仕方に関しては、`ase_calculation_tools.py` を参照
@@ -268,16 +268,16 @@ H      2.321799260968      4.725470489434      0.846011841383
 
 #### a. 初期構造をカレントディレクトリに`co_cat_oxidative_cyclization_As_mmdiMePh_3.xyz`として保存し、以下を実行する。
 ```
-python optmain.py .\co_cat_oxidative_cyclization_As_mmdiMePh_3.xyz -os uma-s-1p1 -opt rsirfo_fsb -ma 100 1 13 100 1 17 200 15 19
+python optmain.py .\co_cat_oxidative_cyclization_As_mmdiMePh_3.xyz -os uma-s-1 -opt rsirfo_fsb -ma 100 1 13 100 1 17 200 15 19
 ```
 - `-opt rsirfo_fsb`は準ニュートン法であるRS-I-RFO法を構造最適化に使用することを示す。初期のへシアンに関しては、特にオプションで指定しない限り、単位行列が使われる。
 - `-spin`はスピン多重度の指定である。PySCFを使用するときは目的とするスピン多重度に1を引いた値を指定する。（デフォルトでは1が指定される。）今回はUMAモデルのNNPを使用し、ラジカル反応を扱うためスピンだ重度を2とした。
 - `-elec M`は形式電荷をMとすることを示す。（デフォルトでは0が指定される。）
 - `-ma yyy a b `はyyykJ/molの活性化障壁を超えうるペア同士を近づける力を原子のラベル番号aとbのペアに構造最適化時に加えることを示す。
-- `-os uma-s-1p1`は今回使用するNNPを指定している。これを使用する際にASEライブラリが必要である。
+- `-os uma-s-1`は今回使用するNNPを指定している。これを使用する際にASEライブラリが必要である。
 
 
-これを実行すると、`omol`のデータセットを使用した`uma-s-1p1`モデルのNNPで得たエネルギーに対して、指定した人工力ポテンシャルを加えた上で初期構造を構造最適化することができる。
+これを実行すると、`omol`のデータセットを使用した`uma-s-1`モデルのNNPで得たエネルギーに対して、指定した人工力ポテンシャルを加えた上で初期構造を構造最適化することができる。
 
 結果は`yyyy_mm_dd`（今日の年月日）ディレクトリの中に存在するディレクトリを開いて確認できる。
 
@@ -298,14 +298,14 @@ NEB法を用いることで、先ほど得られた`co_cat_oxidative_cyclization
 
 
 ```
-python .\nebmain.py co_cat_oxidative_cyclization_As_mmdiMePh_3_traj.xyz -os uma-s-1p1 -ns 15 -modelhess -spng -nd 0.3 -aneb 3 5
+python .\nebmain.py co_cat_oxidative_cyclization_As_mmdiMePh_3_traj.xyz -os uma-s-1 -ns 15 -modelhess -spng -nd 0.3 -aneb 3 5
 ```
 
 - `-nd N`はノード間の距離をN Åとして初期パスを作成することを示す。
 - `-ns n`はn回分NEB法による経路の緩和を行うことを示す。
 - `-fc M`はM回あたりの経路緩和回数に対して1回だけ正確なHessianを計算し、経路緩和に使用する。これを使用すると、Hessianを使用しない場合の経路緩和アルゴリズムとは別のものを使用して、経路緩和を行う。
 - `-spng`は緩和中のパスのエネルギープロファイルや各ノードの勾配のRMS値をmatplotlibで可視化するオプションである。
-- `-os uma-s-1p1`は今回使用するNNPを指定している。これを使用する際にASEライブラリが必要である。
+- `-os uma-s-1`は今回使用するNNPを指定している。これを使用する際にASEライブラリが必要である。
 - `-aneb A B`これを指定すると、(B+1)回の緩和ごとに、エネルギー極大値を示すノードと前後のノードの間に線形補間でA個の新規ノードを内挿するようにできる。デフォルトではこのような操作は行われない。このオプションを使用するとノードの数が徐々に増えるため、計算コストが使用しない場合と比べて増加する。一方で、エネルギー極大値を示すノード周辺にノードを増加させるため、緩和している経路中のノードが遷移状態構造付近に存在する可能性が高くすることが出来る。
 
 
@@ -512,7 +512,7 @@ H       2.322802431086      4.722196640051      0.840701009117
 そして、以下を実行する。
 
 ```
-python .\optmain.py .\co_cat_oxidative_cyclization_As_mmdiMePh_3_traj_24.xyz -fc 5 -order 1 -opt rsirfo_bofill -freq -tcc -os uma-s-1p1
+python .\optmain.py .\co_cat_oxidative_cyclization_As_mmdiMePh_3_traj_24.xyz -fc 5 -order 1 -opt rsirfo_bofill -freq -tcc -os uma-s-1
 ```
 - `-opt rsirfo_bofill`は遷移状態構造の最適化向けのoptimizerを指定することを意味する。準ニュートン法であるRS-I-RFO法を使用する。今回は`-fc`で正確なへシアンを計算するようにしているので、初期へシアンは正確なへシアンを使用するようになっている。
 - `-order 1`は一次の鞍点を求めることを指定する。（デフォルトだと極小値を求めるようになっている。）
