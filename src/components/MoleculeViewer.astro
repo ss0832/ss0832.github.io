@@ -1,5 +1,5 @@
 ---
-// Interface remains unchanged, keeping xyzData
+// The interface is unchanged and still uses xyzData
 interface Props {
   xyzData: string;
   width?: string;
@@ -51,13 +51,9 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 
         // Add atom labels with index and element symbol
         if (showLabels) {
-          /*
-           * Step 3: [FIX] Revert to the working forEach + addLabel (singular)
-           * This fixes the 'n.addLabels is not a function' error.
-           */
+          // Use the working forEach + addLabel (singular) logic
           let atoms = viewer.selectedAtoms({});
           atoms.forEach((atom, idx) => {
-            // Use original 3D-space offset logic
             const position = {
               x: atom.x + 0.3,
               y: atom.y + 0.3,
@@ -88,7 +84,7 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
     }
   }
   
-  // Start initialization immediately (will wait for component to be visible)
+  // Start initialization
   initViewer();
 </script>
 
