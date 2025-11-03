@@ -1,17 +1,15 @@
 ---
-// src/components/widget/RecentPosts.astro (New File)
+// src/components/widget/RecentPosts.astro (Corrected)
 
 import { getCollection } from 'astro:content';
-// Path is './' because WidgetLayout.astro is in the same directory
 import WidgetLayout from "./WidgetLayout.astro"; 
 
-// Helper function to format the date as 'YYYY-MM-DD'
 function formatDate(date: Date) {
   return date.toISOString().split('T')[0];
 }
 
-// 1. Get all blog posts, filtering out drafts (draft: true)
-const allPosts = await getCollection('blog', ({ data }) => {
+// 1. [FIX] Get all posts from the 'posts' collection (to match your 'src/content/posts/' directory)
+const allPosts = await getCollection('posts', ({ data }) => {
   return data.draft !== true;
 });
 
@@ -29,7 +27,12 @@ const { class: className, style } = Astro.props;
   <ul class="recent-posts-list">
     {recentPosts.map((post) => (
       <li class="recent-post-item">
-        <a href={`/blog/${post.slug}/`}>
+        {/* [FIX] The link must also point to the correct collection.
+          If your URLs are just /post-slug/ (without /blog/), this is correct.
+          If your URLs are /posts/post-slug/, change href to:
+          href={`/posts/${post.slug}/`}
+        */}
+        <a href={`/blog/${post.slug}/`}> 
           <span class="post-title">{post.data.title}</span>
           <time class="post-date" datetime={post.data.pubDate.toISOString()}>
             {formatDate(post.data.pubDate)}
