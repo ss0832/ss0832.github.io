@@ -27,12 +27,7 @@ const { class: className, style } = Astro.props;
   <ul class="recent-posts-list">
     {recentPosts.map((post) => (
       <li class="recent-post-item">
-        {/* [FIX] The link must also point to the correct collection.
-          If your URLs are just /post-slug/ (without /blog/), this is correct.
-          If your URLs are /posts/post-slug/, change href to:
-          href={`/posts/${post.slug}/`}
-        */}
-        <a href={`/blog/${post.slug}/`}> 
+        <a href={`/posts/${post.slug}/`}> 
           <span class="post-title">{post.data.title}</span>
           <time class="post-date" datetime={post.data.pubDate.toISOString()}>
             {formatDate(post.data.pubDate)}
