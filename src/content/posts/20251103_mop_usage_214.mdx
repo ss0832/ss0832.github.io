@@ -1,5 +1,5 @@
 ---
-title:  【計算化学】自作pythonライブラリで遷移状態構造を求めてみる(BH9データセットの4. Hydrogen atom transfer, No. 1の化学反応, NNP(UMA)使用)
+title:  【計算化学】自作pythonライブラリで遷移状態構造を求めてみる(BH9データセットの4. Hydrogen atom transfer, No. 4の化学反応, NNP(UMA)使用)
 published: 2025-11-03
 description: ""
 tags: [MultiOptPy, python]
@@ -13,7 +13,7 @@ import MultiDataGraph from '../../components/MultiDataGraph.astro';
 
 ## 概要
 
-本記事では、自作ライブラリ(MultiOptPy)で、BH9データセットの4. Hydrogen atom transfer, No. 1の素過程の遷移状態構造を算出してみる。計算レベルは、Meta社のFAIR Chemistryが開発したニューラルネットワークポテンシャル(NNP)であるUMA(Meta’s Universal Model for Atoms)とした。
+本記事では、自作ライブラリ(MultiOptPy)で、BH9データセットの4. Hydrogen atom transfer, No. 4の素過程の遷移状態構造を算出してみる。計算レベルは、Meta社のFAIR Chemistryが開発したニューラルネットワークポテンシャル(NNP)であるUMA(Meta’s Universal Model for Atoms)とした。
 
 MultiOptPyは電子状態計算ソフトウェアを用いた分子構造最適化手法の勉強を目的として作成したpythonライブラリである。
 
@@ -483,7 +483,7 @@ Normal mode                   x         y         z            x         y      
 
 ## 終わりに
 　
-　自作ライブラリで、UMAモデルのニューラルネットワークポテンシャル(NNP, `uma-s-1p1`)を用いて、BH9データセットの4. Hydrogen atom transfer, No. 1の反応のある1つの遷移状態構造を算出する手順を説明した。
+　自作ライブラリで、UMAモデルのニューラルネットワークポテンシャル(NNP, `uma-s-1p1`)を用いて、BH9データセットの4. Hydrogen atom transfer, No. 4の反応のある1つの遷移状態構造を算出する手順を説明した。
 
 
 
@@ -501,4 +501,5 @@ Normal mode                   x         y         z            x         y      
 - _The Journal of Chemical Physics_, 2020, 153, 024109.
 - _The Journal of Chemical Physics_, 2022, 144, 214108.
 - _J. Phys. Chem. A_ 2019, 123, 3761−3781 http://dx.doi.org/10.1021/acs.jpca.9b01546 (MOBH35のデータセットについて)
+
 
