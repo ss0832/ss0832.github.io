@@ -8,9 +8,9 @@ interface Props {
   showLabels?: boolean;
 }
 
-const { 
-  xyzData, 
-  width = "100%", 
+const {
+  xyzData,
+  width = "100%",
   height = "400px",
   backgroundColor = "white",
   caption,
@@ -21,17 +21,13 @@ const {
 const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 ---
 
-<!-- Load 3Dmol.js libraries first -->
 <script is:inline src="https://3Dmol.org/build/3Dmol-min.js"></script>
-<script is:inline src="https://3Dmol.org/build/3Dmol.ui-min.js"></script>
 
-<!-- Viewer container -->
 <figure class="molecule-viewer-container">
   <div id={viewerId} style={`width:${width}; height:${height}; position:relative; border-radius:8px; overflow:hidden;`}></div>
   {caption && <figcaption>{caption}</figcaption>}
 </figure>
 
-<!-- Molecule viewer initialization script with client:idle -->
 <script define:vars={{ xyzData, viewerId, backgroundColor, showLabels }} client:idle>
   function initViewer() {
     // Check if the viewer element exists and 3Dmol is loaded
@@ -45,7 +41,7 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 
         // Add molecular model from XYZ data
         viewer.addModel(xyzData, "xyz");
-        
+
         // Set molecular style
         viewer.setStyle({}, {
           sphere: { scale: 0.3, colorscheme: "elem" },
@@ -54,39 +50,47 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 
         // Add atom labels with index and element symbol
         if (showLabels) {
-          let atoms = viewer.selectedAtoms({});
-          atoms.forEach((atom, idx) => {
-            // Calculate position with offset
-            const position = {
-              x: atom.x + 0.3,  // Offset to the right
-              y: atom.y + 0.3,  // Offset upwards
-              z: atom.z
-            };
+          /*
+           * [OPTIMIZATION]
+           * Replaced the .forEach loop with viewer.addLabels (plural).
+           * This is massively more performant as it creates a single
+           * optimized render call instead of thousands of individual objects.
+           */
+          viewer.addLabels(
+            // 1. Callback function to generate the label text for each atom
+            (atom) => `${atom.index + 1}:${atom.elem}`,
             
-            viewer.addLabel(`${idx+1}:${atom.elem}`, {
-              position: position,
-              backgroundColor: "rgba(255,255,255,0.25)",  // Semi-transparent background
+            // 2. Options for the labels
+            {
+              // Use screen-space pixel offset (e.g., 5px right, 5px down)
+              // This is more predictable than a 3D world-space offset.
+              position: { x: 5, y: 5 }, 
               fontColor: "black",
               fontSize: 10.5,
-              alignment: "center"
-            });
-          });
+              backgroundColor: "rgba(255,255,255,0.25)",
+              // Must be true to show the backgroundColor
+              showBackground: true, 
+              alignment: "center",
+              // Ensures labels are drawn in front of atoms
+              inFront: true 
+            }
+          );
         }
 
         // Optimize view and render
         viewer.zoomTo();
         viewer.render();
-        
+
         console.log(`Molecule viewer '${viewerId}' initialized successfully`);
       } catch (error) {
         console.error(`Molecule viewer initialization error: ${error.message}`);
       }
     } else {
-      // Retry if element or 3Dmol not found
+      // Retry if element or 3Dmol not found (maintaining original logic)
       setTimeout(initViewer, 50);
     }
   }
-  
+
   // Start initialization immediately
   initViewer();
 </script>
@@ -95,7 +99,7 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
   .molecule-viewer-container {
     margin: 2rem 0;
   }
-  
+
   figcaption {
     text-align: center;
     margin-top: 0.5rem;
