@@ -8,12 +8,12 @@ function formatDate(date: Date) {
   return date.toISOString().split('T')[0];
 }
 
-// 1. [FIX] Get all posts from the 'posts' collection (to match your 'src/content/posts/' directory)
+// 1. [FIX] Get posts from the 'posts' collection
 const allPosts = await getCollection('posts', ({ data }) => {
-  return data.draft !== true;
+  return data.draft !== true && data.pubDate !== undefined;
 });
 
-// 2. Sort posts by pubDate (newest first)
+// 2. Sort posts by pubDate (now this is safe)
 allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
 
 // 3. Get the 5 most recent posts
