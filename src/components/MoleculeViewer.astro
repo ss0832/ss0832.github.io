@@ -1,4 +1,5 @@
 ---
+// Interface remains unchanged, keeping xyzData
 interface Props {
   xyzData: string;
   width?: string;
@@ -21,14 +22,14 @@ const {
 const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
 ---
 
-<script is:inline src="/js/3Dmol-min.js"></script>
+<script is:inline src="/js/3Dmol.min.js"></script>
 
 <figure class="molecule-viewer-container">
   <div id={viewerId} style={`width:${width}; height:${height}; position:relative; border-radius:8px; overflow:hidden;`}></div>
   {caption && <figcaption>{caption}</figcaption>}
 </figure>
 
-<script define:vars={{ xyzData, viewerId, backgroundColor, showLabels }} client:idle>
+<script define:vars={{ xyzData, viewerId, backgroundColor, showLabels }} client:visible>
   function initViewer() {
     // Check if the viewer element exists and 3Dmol is loaded
     if (document.getElementById(viewerId) && window.$3Dmol) {
@@ -39,9 +40,9 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
           { backgroundColor: backgroundColor }
         );
 
-        // Add molecular model from XYZ data
+        // Add molecular model directly from the xyzData prop
         viewer.addModel(xyzData, "xyz");
-
+        
         // Set molecular style
         viewer.setStyle({}, {
           sphere: { scale: 0.3, colorscheme: "elem" },
@@ -51,47 +52,43 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
         // Add atom labels with index and element symbol
         if (showLabels) {
           /*
-           * [OPTIMIZATION]
-           * Replaced the .forEach loop with viewer.addLabels (plural).
-           * This is massively more performant as it creates a single
-           * optimized render call instead of thousands of individual objects.
+           * Step 3: [FIX] Revert to the working forEach + addLabel (singular)
+           * This fixes the 'n.addLabels is not a function' error.
            */
-          viewer.addLabels(
-            // 1. Callback function to generate the label text for each atom
-            (atom) => `${atom.index + 1}:${atom.elem}`,
+          let atoms = viewer.selectedAtoms({});
+          atoms.forEach((atom, idx) => {
+            // Use original 3D-space offset logic
+            const position = {
+              x: atom.x + 0.3,
+              y: atom.y + 0.3,
+              z: atom.z
+            };
             
-            // 2. Options for the labels
-            {
-              // Use screen-space pixel offset (e.g., 5px right, 5px down)
-              // This is more predictable than a 3D world-space offset.
-              position: { x: 5, y: 5 }, 
+            viewer.addLabel(`${idx+1}:${atom.elem}`, {
+              position: position,
+              backgroundColor: "rgba(255,255,255,0.25)",
               fontColor: "black",
               fontSize: 10.5,
-              backgroundColor: "rgba(255,255,255,0.25)",
-              // Must be true to show the backgroundColor
-              showBackground: true, 
-              alignment: "center",
-              // Ensures labels are drawn in front of atoms
-              inFront: true 
-            }
-          );
+              alignment: "center"
+            });
+          });
         }
 
         // Optimize view and render
         viewer.zoomTo();
         viewer.render();
-
+        
         console.log(`Molecule viewer '${viewerId}' initialized successfully`);
       } catch (error) {
         console.error(`Molecule viewer initialization error: ${error.message}`);
       }
     } else {
-      // Retry if element or 3Dmol not found (maintaining original logic)
+      // Retry if element or 3Dmol not found
       setTimeout(initViewer, 50);
     }
   }
-
-  // Start initialization immediately
+  
+  // Start initialization immediately (will wait for component to be visible)
   initViewer();
 </script>
 
@@ -99,7 +96,7 @@ const viewerId = `mol-viewer-${Math.random().toString(36).substring(2, 9)}`;
   .molecule-viewer-container {
     margin: 2rem 0;
   }
-
+  
   figcaption {
     text-align: center;
     margin-top: 0.5rem;
