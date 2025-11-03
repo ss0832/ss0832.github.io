@@ -1,0 +1,81 @@
+---
+// src/components/widget/RecentPosts.astro (New File)
+
+import { getCollection } from 'astro:content';
+// Path is './' because WidgetLayout.astro is in the same directory
+import WidgetLayout from "./WidgetLayout.astro"; 
+
+// Helper function to format the date as 'YYYY-MM-DD'
+function formatDate(date: Date) {
+  return date.toISOString().split('T')[0];
+}
+
+// 1. Get all blog posts, filtering out drafts (draft: true)
+const allPosts = await getCollection('blog', ({ data }) => {
+  return data.draft !== true;
+});
+
+// 2. Sort posts by pubDate (newest first)
+allPosts.sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+// 3. Get the 5 most recent posts
+const recentPosts = allPosts.slice(0, 5);
+
+// 4. Accept class and style from Astro.props
+const { class: className, style } = Astro.props;
+---
+
+<WidgetLayout name="Recent Posts" id="recent-posts" class={className} style={style}>
+  <ul class="recent-posts-list">
+    {recentPosts.map((post) => (
+      <li class="recent-post-item">
+        <a href={`/blog/${post.slug}/`}>
+          <span class="post-title">{post.data.title}</span>
+          <time class="post-date" datetime={post.data.pubDate.toISOString()}>
+            {formatDate(post.data.pubDate)}
+          </time>
+        </a>
+      </li>
+    ))}
+  </ul>
+</WidgetLayout>
+
+<style>
+  .recent-posts-list {
+    list-style: none;
+    padding-left: 0;
+    margin-bottom: 0;
+  }
+  .recent-post-item {
+    border-bottom: 1px solid var(--card-border);
+  }
+  .recent-post-item:last-child {
+    border-bottom: none;
+  }
+  .recent-post-item a {
+    display: block;
+    padding: 10px 4px;
+    text-decoration: none;
+    color: var(--text-color);
+    border-radius: 4px; 
+  }
+  .recent-post-item a:hover {
+    background-color: var(--card-hover-bg);
+  }
+  .post-title {
+    display: block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--text-color);
+  }
+  .post-date {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-color-light);
+    margin-top: 4px;
+  }
+  .recent-post-item a:hover .post-title {
+     color: var(--primary);
+  }
+</style>
