@@ -1,5 +1,5 @@
 ---
-title:  【計算化学】自作pythonライブラリで遷移状態構造を求めてみる(DPPVが配位したNi錯体触媒が関わるfluorobenzeneの還元的脱離, NNP(UMA)使用)
+title:  【計算化学】自作pythonライブラリで遷移状態構造を求めてみる(DPPV類縁体が配位したNi錯体触媒が関わるfluorobenzeneの還元的脱離, NNP(UMA)使用)
 published: 2025-11-29
 description: ""
 tags: [MultiOptPy, python]
@@ -13,7 +13,10 @@ import MultiDataGraph from '../../components/MultiDataGraph.astro';
 
 ## 概要
 
-本記事では、自作ライブラリ(MultiOptPy)で、DPPVが配位したNi錯体触媒が関わるfluorobenzeneの還元的脱離の素過程の遷移状態構造を算出してみる。計算レベルは、Meta社のFAIR Chemistryが開発したニューラルネットワークポテンシャル(NNP)であるUMA(Meta’s Universal Model for Atoms)とした。
+本記事では、自作ライブラリ(MultiOptPy)で、DPPV類縁体が配位したNi錯体触媒が関わるfluorobenzeneの還元的脱離の素過程の遷移状態構造を算出してみる。計算レベルは、Meta社のFAIR Chemistryが開発したニューラルネットワークポテンシャル(NNP)であるUMA(Meta’s Universal Model for Atoms)とした。
+
+
+計算コストの削減のためにDPPVの置換基部位をフェニル基から水素に変えた。
 
 MultiOptPyは電子状態計算ソフトウェアを用いた分子構造最適化手法の勉強を目的として作成したpythonライブラリである。
 
@@ -526,7 +529,7 @@ Normal mode                   x         y         z            x         y      
 
 ## 終わりに
 　
-　自作ライブラリで、UMAモデルのニューラルネットワークポテンシャル(NNP, `uma-s-1p1`)を用いて、DPPVが配位したNi錯体触媒が関わるfluorobenzeneの還元的脱離の反応のある1つの遷移状態構造を算出する手順を説明した。
+　自作ライブラリで、UMAモデルのニューラルネットワークポテンシャル(NNP, `uma-s-1p1`)を用いて、DPPV類縁体が配位したNi錯体触媒が関わるfluorobenzeneの還元的脱離の反応のある1つの遷移状態構造を算出する手順を説明した。
 
 
 
