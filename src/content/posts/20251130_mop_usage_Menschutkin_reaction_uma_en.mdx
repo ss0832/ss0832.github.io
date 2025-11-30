@@ -1,5 +1,5 @@
 ---
-title:  【Computational Chemistry】 Calculating Transition State Structures with a Custom Python Library (Menschutkin Reaction (Chloromethane, Ammonia), using NNP (UMA))
+title: 【Computational Chemistry】 Calculating Transition State Structures with a Custom Python Library (Menschutkin Reaction (Chloromethane, Ammonia), using NNP (UMA))
 published: 2025-11-30
 description: ""
 tags: [MultiOptPy, python]
@@ -8,7 +8,8 @@ draft: false
 ---
 Last updated: 2025-11-30
 
-import MoleculeViewer from '../../components/MoleculeViewer.astro'; import MultiDataGraph from '../../components/MultiDataGraph.astro';
+import MoleculeViewer from '../../components/MoleculeViewer.astro'; 
+import MultiDataGraph from '../../components/MultiDataGraph.astro';
 
 ## Overview
 
@@ -278,13 +279,17 @@ export const dataset1 = [-556.6390723404783,-556.6390723404783,-556.637159552299
 
 export const dataset1_itr10 = [-556.6390723404783,-556.6389230320419,-556.6378902270098,-556.6366488536619,-556.6338461487386,-556.6294632438803,-556.6223574840157,-556.6081237664738,-556.5835196378957,-556.5742732172812,-556.5785614167297,-556.5808478582293,-556.5813479716163,-556.5818159086892,-556.5826788962935,-556.5832843277212,-556.5835189774813,-556.5837795498792];
 
-export const dataset2 = [-556.6390723404783,-556.6389299844651,-556.638335475614,-556.6372586210448,-556.6351800129721,-556.6315246220345,-556.6257261258276,-556.6151385019454,-556.5922828798814,-556.5778965337597,-556.5790160381816,-556.581006394945,-556.5815459141588,-556.5821610042855,-556.5828301728308,-556.5833984644311,-556.5837867432497,-556.5839780772664]; <MultiDataGraph datasets={[ { data: dataset1, label: "Energy of path before relaxation", color: "rgba(75, 192, 192, 1)" }, { data: dataset1_itr5, label: "Energy of path at ITR. 5", color: "rgba(81, 43, 186, 1)" }, { data: dataset1_itr10, label: "Energy of path at ITR. 10", color: "rgba(81, 143, 18, 1)"}, { data: dataset2, label: "Energy of path after relaxation", color: "rgba(255, 99, 132, 1)" }, ]} title="Visualization of NEB calculation results" xLabel="# NODE" yLabel="Electronic Energy [hartree]" height="500px" />
+export const dataset2 = [-556.6390723404783,-556.6389299844651,-556.638335475614,-556.6372586210448,-556.6351800129721,-556.6315246220345,-556.6257261258276,-556.6151385019454,-556.5922828798814,-556.5778965337597,-556.5790160381816,-556.581006394945,-556.5815459141588,-556.5821610042855,-556.5828301728308,-556.5833984644311,-556.5837867432497,-556.5839780772664]; 
+
+<MultiDataGraph datasets={[ { data: dataset1, label: "Energy of path before relaxation", color: "rgba(75, 192, 192, 1)" }, { data: dataset1_itr5, label: "Energy of path at ITR. 5", color: "rgba(81, 43, 186, 1)" }, { data: dataset1_itr10, label: "Energy of path at ITR. 10", color: "rgba(81, 143, 18, 1)"}, { data: dataset2, label: "Energy of path after relaxation", color: "rgba(255, 99, 132, 1)" }, ]} title="Visualization of NEB calculation results" xLabel="# NODE" yLabel="Electronic Energy [hartree]" height="500px" />
 
 export const dataset1_grad = [6.533901335329898e-06,6.533931096131353e-06,0.005825796997232678,0.01451739176689497,0.017382907521618713,0.019590142449946866,0.021328092306372413,0.0219672934974316,0.032324988320939926,0.06452794905223087,0.02610540841889605,0.02840704545391767,0.0241689903723942,0.02406362960897499,0.025605700398803315,0.02521878996679511,0.023956604890136214,0.02404096049191205]; export const dataset1_grad_itr5 = [1.886684393986465e-06,0.0018621650383859373,0.005425846006475897,0.005696578191391794,0.006841918403326686,0.00829335533378122,0.008872293455461068,0.01262137231588497,0.01371725403673573,0.010985277024875553,0.01054544276631165,0.0044336028718655355,0.004506198938894269,0.0054724372051068995,0.004409292647597653,0.003764136853720198,0.004673367222394108,0.0032530485500330583];
 
 export const dataset1_grad_itr10 = [8.728417111763924e-07,0.00039576968263114494,0.002184685051548528,0.002440854869777202,0.0031849365950673155,0.004064031864118822,0.005606774940665971,0.010824502499318116,0.010345393873253414,0.004676627998366358,0.0032094467916904787,0.0011093293446688768,0.0011912735576488415,0.0018010379499306716,0.0011741167358747015,0.0012076164322713068,0.0015284493899873266,0.0011319546547941285];
 
-export const dataset2_grad = [6.187458096114318e-07,0.0004384425557137081,0.0010814961442587013,0.0013709886709073421,0.0015119092919303459,0.002517796884359324,0.003815806343105795,0.008441115956656312,0.011818004298752549,0.004198373357129853,0.0029604851678814094,0.0009270873860625182,0.0006476590938938054,0.0008244873036495437,0.0006757407751958534,0.0012690280567547371,0.0012490596152829388,0.0004989597277001411]; <MultiDataGraph datasets={[ { data: dataset1_grad, label: "RMS of gradient of path before relaxation", color: "rgba(75, 192, 192, 1)" }, { data: dataset1_grad_itr5, label: "RMS of gradient of path at ITR. 5", color: "rgba(81, 43, 186, 1)" }, { data: dataset1_grad_itr10, label: "RMS of gradient of path at ITR. 10", color: "rgba(81, 143, 18, 1)"}, { data: dataset2_grad, label: "RMS of gradient of path after relaxation", color: "rgba(255, 99, 132, 1)" }, ]} title="Visualization of NEB calculation results" xLabel="# NODE" yLabel="RMS of gradient [hartree/Bohr]" height="500px" />
+export const dataset2_grad = [6.187458096114318e-07,0.0004384425557137081,0.0010814961442587013,0.0013709886709073421,0.0015119092919303459,0.002517796884359324,0.003815806343105795,0.008441115956656312,0.011818004298752549,0.004198373357129853,0.0029604851678814094,0.0009270873860625182,0.0006476590938938054,0.0008244873036495437,0.0006757407751958534,0.0012690280567547371,0.0012490596152829388,0.0004989597277001411]; 
+
+<MultiDataGraph datasets={[ { data: dataset1_grad, label: "RMS of gradient of path before relaxation", color: "rgba(75, 192, 192, 1)" }, { data: dataset1_grad_itr5, label: "RMS of gradient of path at ITR. 5", color: "rgba(81, 43, 186, 1)" }, { data: dataset1_grad_itr10, label: "RMS of gradient of path at ITR. 10", color: "rgba(81, 143, 18, 1)"}, { data: dataset2_grad, label: "RMS of gradient of path after relaxation", color: "rgba(255, 99, 132, 1)" }, ]} title="Visualization of NEB calculation results" xLabel="# NODE" yLabel="RMS of gradient [hartree/Bohr]" height="500px" />
 
 Note: You can check the RMS value of the gradient of all nodes for each Iteration in bias_force_rms.csv.
 
