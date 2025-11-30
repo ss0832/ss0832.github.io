@@ -1,0 +1,423 @@
+---
+title:  【Computational Chemistry】 Calculating Transition State Structures with a Custom Python Library (Menschutkin Reaction (Chloromethane, Ammonia), using NNP (UMA))
+published: 2025-11-30
+description: ""
+tags: [MultiOptPy, python]
+category: Computational Chemistry
+draft: false
+---
+Last updated: 2025-11-30
+
+import MoleculeViewer from '../../components/MoleculeViewer.astro'; import MultiDataGraph from '../../components/MultiDataGraph.astro';
+
+## Overview
+
+In this article, I will attempt to calculate the transition state structure for the elementary process of the Menschutkin reaction (involving chloromethane and ammonia) using a self-made library (MultiOptPy). The calculation level used is UMA (Meta’s Universal Model for Atoms), a Neural Network Potential (NNP) developed by Meta's FAIR Chemistry.
+
+MultiOptPy is a Python library created for the purpose of studying molecular geometry optimization methods using electronic structure calculation software.
+
+MultiOptPy Repository: https://github.com/ss0832/MultiOptPy
+
+
+### About the Neural Network Potential used this time:
+
+- https://ai.meta.com/blog/meta-fair-science-new-open-source-releases/ (Article regarding the release of UMA)
+- https://github.com/facebookresearch/fairchem (GitHub repository provided by FAIR Chemistry)
+- https://fair-chem.github.io/ (Site explaining the contents of the above repository)
+- https://huggingface.co/facebook/UMA (NNP distribution site; requires account registration on Hugging Face and acceptance of the license agreement.)
+- arXiv preprint arXiv:2505.08762 (2025). (Preprint)
+
+### Version of the Custom Library MultiOptPy Used
+```
+v1.20.0
+```
+### Environment
+```
+Windows 11
+```
+
+Note: Anaconda PowerShell Prompt was used in a Windows 11 environment.
+
+### Download Source code (Unix commands)
+```
+wget https://github.com/ss0832/MultiOptPy/archive/refs/tags/v1.20.0.zip
+unzip v1.20.0.zip
+cd MultiOptPy-v1.20.0
+```
+
+Access https://github.com/ss0832/MultiOptPy/releases/tag/v1.20.0 to download the zip file. Since the directory name differs from the Unix command case, please interpret it accordingly.
+
+By referring to requirements.txt in the destination directory, you can grasp the modules necessary for this source code. It is recommended to investigate installation methods via LLM dialogue or other means according to your specific situation.
+
+If you use the environment setup procedure described next, after the environment setup is complete, you can install the minimum modules required to operate this custom module with `pip install -r requirements.txt`.
+
+### Environment Setup Procedure
+
+This time, Windows 11 PowerShell was used. First, I will explain the procedure to prepare an Anaconda PowerShell Prompt where the NNP environment is ready.
+
+Install Anaconda using `Anaconda3-2025.06-1-Windows-x86_64.exe` from https://repo.anaconda.com/archive/.
+
+Use the search function to open Anaconda PowerShell Prompt from the Start menu.
+
+Execute the following command to create a virtual environment.
+```
+conda create -n (arbitrary_env_name) python=3.12.7
+```
+
+Activate the virtual environment created above with conda activate (arbitrary_env_name).
+
+Execute the following command to install the necessary libraries.
+
+```
+pip install ase==3.26.0 fairchem-core==2.7.1 torch==2.6.0
+
+```
+
+- fairchem-core is a library required to operate the NNPs managed by FAIR Chemistry.
+- ase is a library required to serve as an interface for passing molecular structures for which electronic energy is to be calculated to the NNP.
+- torch refers to the PyTorch library. This is essential for performing machine learning such as neural networks and handling learning results.
+
+
+With this, you can prepare to use the NNP by launching the virtual environment from Anaconda PowerShell Prompt.
+
+Next, I will explain how to download the .pt file containing the Model information necessary to use the NNP and how to introduce it to the custom library.
+
+Access the following site and download `uma-s-1p1.pt`. (Possible if the license agreement is accepted.)
+```
+https://huggingface.co/facebook/UMA
+```
+After downloading, add the following to software_path.conf existing in the MultiOptPy-v1.20.0 directory using the absolute path of `uma-s-1p1.pt`.
+```
+uma-s-1p1::(absolute path to uma-s-1p1.pt)
+```
+Now, MultiOptPy-v1.20.0 will be able to use the NNP `uma-s-1p1`.
+
+### Specific Explanation of the NNP Used
+
+I will specifically explain the NNP used this time.
+
+The Model Checkpoint for UMA used was uma-s-1p1.
+
+We use a neural network potential trained using `Omol25 (omol)`, a training set for small molecule systems.
+
+Note: For specific usage in the custom library, refer to `ase_calculation_tools.py`. If you wish to use a model other than `omol`, in the current version, this can be handled by editing `self.task_name` in `multioptpy/Calculator/ase_tools/firechem.py`.
+
+## Procedure
+
+### 1. Preparation of Initial Structure
+
+The following structure was prepared as the model reaction system. The file name was set to `Menschutkin_reaction_uma.xyz`. The following initial structure was used.
+
+```
+9
+OptimizedStructure
+C     -1.506071759576      0.085544514299     -0.064281174583
+H     -1.218141091393     -0.958848708886     -0.041999766850
+H     -1.166526564750      0.586257914362      0.834685102922
+H     -1.091499124560      0.569098562317     -0.940889237019
+Cl    -3.288972298911      0.188390661147     -0.140664880758
+N      1.784227712748     -0.101895739777      0.076488792396
+H      2.110688550552     -1.061018470951      0.083104319481
+H      2.154013309803      0.340179129851      0.909752939245
+H      2.222281266089      0.352292137639     -0.716196094835
+```
+<MoleculeViewer xyzData={`9 
+OptimizedStructure 
+C -1.506071759576 0.085544514299 -0.064281174583 
+H -1.218141091393 -0.958848708886 -0.041999766850 
+H -1.166526564750 0.586257914362 0.834685102922 
+H -1.091499124560 0.569098562317 -0.940889237019 
+Cl -3.288972298911 0.188390661147 -0.140664880758 
+N 1.784227712748 -0.101895739777 0.076488792396 
+H 2.110688550552 -1.061018470951 0.083104319481 
+H 2.154013309803 0.340179129851 0.909752939245 
+H 2.222281266089 0.352292137639 -0.716196094835`} caption="Initial structure for determining the initial path" backgroundColor="#333333" />
+
+### 2. Transition State Structure Optimization
+By using `run_autots.py` appropriately, the transition state structure can be obtained automatically. I will explain the procedure below.
+
+Save the initial structure as `Menschutkin_reaction_uma.xyz` in the current directory. Then, in the same directory, create `config_Menschutkin_reaction_uma.json` and write the following:
+
+config_Menschutkin_reaction_uma.json
+
+```JSON
+
+{
+  "work_dir": "Menschutkin_reaction_uma",
+  "top_n_candidates": 3,
+  "multioptpy_version": "1.20.0",
+  
+  "step1_settings": {
+    "othersoft": "uma-s-1p1",
+    "opt_method": ["rsirfo_block_fsb"],
+    "use_model_hessian": "fischerd3",
+    "spin_multiplicity": 1,
+    "electronic_charge": 0,
+	"manual_AFIR": ["500", "1", "6"]
+  },
+  
+  "step2_settings": {
+    "othersoft": "uma-s-1p1",
+    "NSTEP": 20,
+    "use_model_hessian": "fischerd3",
+    "save_pict": true,
+	"QSMv2": true,
+    "node_distance": 0.30,
+    "align_distances_energy_predicted": 1,
+    "spin_multiplicity": 1,
+    "electronic_charge": 0
+  },
+  
+  "step3_settings": {
+    "othersoft": "uma-s-1p1",
+    "opt_method": ["rsirfo_block_bofill"],
+    "calc_exact_hess": 5,
+    "tight_convergence_criteria": true,
+    "max_trust_radius": 0.2,
+    "frequency_analysis": true,
+	"NSTEP": 500,
+	"detect_negative_eigenvalues": true,
+    "spin_multiplicity": 1,
+    "electronic_charge": 0
+  },
+
+  "step4_settings": {
+    "othersoft": "uma-s-1p1",
+	"opt_method": ["rsirfo_block_bofill"],
+    "spin_multiplicity": 1,
+    "electronic_charge": 0,
+	"calc_exact_hess": 10,
+    "tight_convergence_criteria": true,
+    "frequency_analysis": true,
+    
+    "intrinsic_reaction_coordinates": ["0.5", "200", "lqa"],
+
+    "step4b_opt_method": ["rsirfo_block_fsb"]
+  }
+}
+```
+
+After that, execute the following command.
+
+```
+python run_autots.py Menschutkin_reaction_uma.xyz -cfg config_Menschutkin_reaction_uma.json
+```
+
+This consolidates the command operations performed in similar previous articles and automatically performs the process of finding the transition state structure.
+
+
+The specific flow of processing is:
+```
+Step1. Creation of an initial path for the NEB method using bias potential.
+
+Step2. Path relaxation using the NEB method.
+
+Step3. Calculation of the transition state structure using the structures showing energy maxima in the path obtained by the NEB method as initial structures. Up to 3 structures with the highest energy values are used (The maximum value can be changed with `--top_n X` in `run_autots.py`).
+
+(Step4. IRC calculation for the obtained transition state structure and geometry optimization for the structures at the ends of the IRC path. This is not performed unless `--run_step4` is added to the command.)
+```
+
+Explanation of `run_autots.py` options:
+
+- `-cfg YYY.json`: specifies the loading destination of the JSON file containing the options for executing the workflow.
+
+The results of this series can be confirmed by opening the files in the directory named (name specified in "work_dir" of the json file).
+
+Below is an explanation of options common to all steps.
+
+- `"opt_method": ["rsirfo_block_fsb"]` indicates using the RS-I-RFO method, a quasi-Newton method, for geometry optimization. Unless specifically specified by an option, the identity matrix is used for the initial Hessian. (It uses a method slightly different from the previous Hessian update method in minor details. Specifically, it uses multiple coordinate displacements and gradient displacements to update the Hessian.)
+
+- `"spin_multiplicity": Z` is the specification of spin multiplicity. When using PySCF, specify the value obtained by subtracting 1 from the target spin multiplicity. (Default is 1.)
+
+- `"electronic_charge": 0` indicates that the formal charge is M. (Default is 0.)
+
+- `"othersoft": "uma-s-1p1"` specifies the NNP used this time. The ASE library is required when using this.
+
+- `"use_model_hessian": "fischerd3"` is an option to call a function that generates an approximated Hessian using a formula with very low computational cost. By default, this function is not used.
+
+Note: Descriptions of options are shown in MultiOptPy-v1.20.0/OPTION_README.md.
+
+#### Step 1
+In Step 1, geometry optimization is performed on the initial structure after adding a specified artificial force potential to the energy obtained by the NNP of the uma-s-1p1 model using the omol dataset.
+
+Generate a trajectory to be used as the initial path for the next path relaxation algorithm with the bias potential described in the JSON below.
+
+- `"manual_AFIR": ["yyy", "a", "b"]`: Indicates adding a force during geometry optimization that brings the pair of atoms with label numbers a and b closer, capable of overcoming an activation barrier of yyy kJ/mol.
+
+- `"shape_conditions": ["yyy", "lt", "a,b"]`: Abort geometry optimization if the distance between the atom with label number a and the atom with label number b becomes larger than yyy (Å) during optimization. If "lt" is changed to "gt", it aborts when it becomes smaller than yyy (Å).
+
+- `"shape_conditions": ["yyy", "lt", "a,b,c"]`: Abort geometry optimization if the angle formed by atom a, atom b (center), and atom c becomes larger than yyy (degrees). If "lt" is changed to "gt", it aborts when it becomes smaller than yyy (degrees).
+
+- `"shape_conditions": ["yyy", "lt", "a,b,c,d"]`: Abort geometry optimization if the dihedral angle formed by atom a and atom d, with atoms b and c as the axis, becomes larger than yyy (degrees). If "lt" is changed to "gt", it aborts when it becomes smaller than yyy (degrees).
+
+If Step 1 ends normally, `Menschutkin_reaction_uma_step1_traj.xyz` exists in the created `work_dir` directory. Check it as necessary to confirm if the intended initial path has been obtained. If it is different from expected, kill the process, review the settings, and try again.
+
+`Menschutkin_reaction_uma_step1_traj.xyz` is made so that the process of geometry optimization can be visualized and confirmed with Avogadro (Official page: https://avogadro.cc/ ) etc. This `Menschutkin_reaction_uma_step1_traj.xyz` is used for the NEB calculation in Step 2.
+
+Note: If you want to display `Menschutkin_reaction_uma_step1_traj.xyz` as an animation, you can use [https://github.com/ss0832/molecule_movie].
+
+#### Step 2
+
+In Step 2, by using the NEB method, the energy of the entire `Menschutkin_reaction_uma_step1_traj.xyz` obtained earlier can be lowered. This brings the structure with the energy maximum of the path closer to the transition state structure. (The exact transition state structure has not been determined at this point.)
+
+Options specific to Step 2 are shown below.
+
+- `"NSTEP": n` indicates performing path relaxation by the NEB method for n times.
+
+- `"save_pict": true` is an option to visualize the energy profile of the relaxing path and the RMS value of the gradient of each node using matplotlib.
+
+- `"node_distance": yyy`: Rearranges the structures by linear interpolation at intervals of yyy (Å) on the path coordinates of the input path to serve as the initial path.
+
+- `"align_distances_energy_predicted": a`: Rearranges the structures by linear interpolation at equal intervals on the path coordinates once every a times of path relaxation. For the structure showing the energy maximum, a polynomial using the path coordinate as a variable is created using information from the preceding and succeeding nodes, and the location of the true energy maximum is estimated by continuous optimization and rearranged.
+
+A directory containing the name NEB is generated in the same directory as MultiOptPy-v1.20.0/"work_dir". Check energy_plot.csv in that directory and confirm the structure showing the energy maximum of the path after relaxation.
+
+List of energies of each node after path relaxation (Unit: hartree) (Saved in energy_plot.csv.)
+
+export const dataset1 = [-556.6390723404783,-556.6390723404783,-556.6371595522994,-556.6279915359183,-556.6200424891723,-556.6092352418765,-556.5928769435276,-556.565465931782,-556.5308703014242,-556.4971251491278,-556.5559443406521,-556.5644584875428,-556.5681379732049,-556.5695416529979,-556.5705225667551,-556.5712991265826,-556.5724062747918,-556.5723984001978]; export const dataset1_itr5 = [-556.6390723317165,-556.6387214424343,-556.6361545262944,-556.6345657858748,-556.6309473759583,-556.6257012863571,-556.6189588355099,-556.604736322015,-556.5805214316637,-556.5656691247841,-556.5674803317949,-556.5782137627118,-556.5800281009416,-556.5802033495393,-556.5814890955128,-556.5823938316081,-556.5825508240712,-556.5831871810777];
+
+export const dataset1_itr10 = [-556.6390723404783,-556.6389230320419,-556.6378902270098,-556.6366488536619,-556.6338461487386,-556.6294632438803,-556.6223574840157,-556.6081237664738,-556.5835196378957,-556.5742732172812,-556.5785614167297,-556.5808478582293,-556.5813479716163,-556.5818159086892,-556.5826788962935,-556.5832843277212,-556.5835189774813,-556.5837795498792];
+
+export const dataset2 = [-556.6390723404783,-556.6389299844651,-556.638335475614,-556.6372586210448,-556.6351800129721,-556.6315246220345,-556.6257261258276,-556.6151385019454,-556.5922828798814,-556.5778965337597,-556.5790160381816,-556.581006394945,-556.5815459141588,-556.5821610042855,-556.5828301728308,-556.5833984644311,-556.5837867432497,-556.5839780772664]; <MultiDataGraph datasets={[ { data: dataset1, label: "Energy of path before relaxation", color: "rgba(75, 192, 192, 1)" }, { data: dataset1_itr5, label: "Energy of path at ITR. 5", color: "rgba(81, 43, 186, 1)" }, { data: dataset1_itr10, label: "Energy of path at ITR. 10", color: "rgba(81, 143, 18, 1)"}, { data: dataset2, label: "Energy of path after relaxation", color: "rgba(255, 99, 132, 1)" }, ]} title="Visualization of NEB calculation results" xLabel="# NODE" yLabel="Electronic Energy [hartree]" height="500px" />
+
+export const dataset1_grad = [6.533901335329898e-06,6.533931096131353e-06,0.005825796997232678,0.01451739176689497,0.017382907521618713,0.019590142449946866,0.021328092306372413,0.0219672934974316,0.032324988320939926,0.06452794905223087,0.02610540841889605,0.02840704545391767,0.0241689903723942,0.02406362960897499,0.025605700398803315,0.02521878996679511,0.023956604890136214,0.02404096049191205]; export const dataset1_grad_itr5 = [1.886684393986465e-06,0.0018621650383859373,0.005425846006475897,0.005696578191391794,0.006841918403326686,0.00829335533378122,0.008872293455461068,0.01262137231588497,0.01371725403673573,0.010985277024875553,0.01054544276631165,0.0044336028718655355,0.004506198938894269,0.0054724372051068995,0.004409292647597653,0.003764136853720198,0.004673367222394108,0.0032530485500330583];
+
+export const dataset1_grad_itr10 = [8.728417111763924e-07,0.00039576968263114494,0.002184685051548528,0.002440854869777202,0.0031849365950673155,0.004064031864118822,0.005606774940665971,0.010824502499318116,0.010345393873253414,0.004676627998366358,0.0032094467916904787,0.0011093293446688768,0.0011912735576488415,0.0018010379499306716,0.0011741167358747015,0.0012076164322713068,0.0015284493899873266,0.0011319546547941285];
+
+export const dataset2_grad = [6.187458096114318e-07,0.0004384425557137081,0.0010814961442587013,0.0013709886709073421,0.0015119092919303459,0.002517796884359324,0.003815806343105795,0.008441115956656312,0.011818004298752549,0.004198373357129853,0.0029604851678814094,0.0009270873860625182,0.0006476590938938054,0.0008244873036495437,0.0006757407751958534,0.0012690280567547371,0.0012490596152829388,0.0004989597277001411]; <MultiDataGraph datasets={[ { data: dataset1_grad, label: "RMS of gradient of path before relaxation", color: "rgba(75, 192, 192, 1)" }, { data: dataset1_grad_itr5, label: "RMS of gradient of path at ITR. 5", color: "rgba(81, 43, 186, 1)" }, { data: dataset1_grad_itr10, label: "RMS of gradient of path at ITR. 10", color: "rgba(81, 143, 18, 1)"}, { data: dataset2_grad, label: "RMS of gradient of path after relaxation", color: "rgba(255, 99, 132, 1)" }, ]} title="Visualization of NEB calculation results" xLabel="# NODE" yLabel="RMS of gradient [hartree/Bohr]" height="500px" />
+
+Note: You can check the RMS value of the gradient of all nodes for each Iteration in bias_force_rms.csv.
+
+As a result of path relaxation, the following structure was used as the initial structure for step 3. It can be confirmed in `Menschutkin_reaction_uma_ts_guess_X.xyz` saved in `Menschutkin_reaction_uma_step3_TS_Opt_Inputs` within "work_dir". The structures are ordered by energy value, with smaller ts_guess numbers indicating higher energy.
+
+Note: Visualization is also possible using this [https://ss0832.github.io/molecule_viewer/].
+
+`Menschutkin_reaction_uma_ts_guess_1.xyz`
+```
+9
+0 1
+C      -0.644405437600      0.036767233999     -0.026935376489
+H      -0.790805856751     -1.014233713336      0.009939944641
+H      -0.734578411661      0.606905360206      0.864370973732
+H      -0.659901984343      0.532394647203     -0.965935357469
+Cl     -2.983237482995      0.168078324208     -0.128801418633
+N       1.209916485416     -0.068927134847      0.051938924888
+H       1.482425432372     -1.041683331679      0.037334263705
+H       1.525361733676      0.368160275193      0.906405579374
+H       1.595225521884      0.412538339053     -0.748317533749
+```
+<MoleculeViewer xyzData={`9
+0 1 
+C -0.644405437600 0.036767233999 -0.026935376489 
+H -0.790805856751 -1.014233713336 0.009939944641 
+H -0.734578411661 0.606905360206 0.864370973732
+H -0.659901984343 0.532394647203 -0.965935357469 
+Cl -2.983237482995 0.168078324208 -0.128801418633 
+N 1.209916485416 -0.068927134847 0.051938924888 
+H 1.482425432372 -1.041683331679 0.037334263705 
+H 1.525361733676 0.368160275193 0.906405579374 
+H 1.595225521884 0.412538339053 -0.748317533749`} caption="Initial structure for seeking transition state structure obtained from path relaxed by NEB method (No.1)" backgroundColor="#333333" />
+
+#### Step 3
+
+Options in step 3 that require additional explanation are shown below.
+
+- `"opt_method": ["rsirfo_block_bofill"]` means specifying an optimizer suitable for transition state structure optimization. The RS-I-RFO method, a quasi-Newton method, is used. In this case, since the exact Hessian is calculated with -fc, the exact Hessian is used for the initial Hessian. (The Hessian update method by Bofill is modified in minor details. Specifically, multiple coordinate displacements and gradient displacements are used to update the Hessian.)
+
+- `"saddle_order": 1` specifies finding a first-order saddle point. (The default for step 3 specifies a first-order saddle point. Specifying other values is not assumed for the purpose of the program, so it is recommended not to do so.)
+
+- `"calc_exact_hess": 5` specifies calculating the exact Hessian once every 5 iterations.
+
+- `"frequency_analysis": true` indicates performing normal mode analysis after meeting the convergence criteria. (Since it is implemented independently, it is recommended to use it as a guide only. Each vibration mode can be visualized with the xyz file in vibration_animation.) The Hessian calculated from the UMA model is obtained by numerical differentiation, so if the number of atoms Z is large, the calculation cost increases rapidly on the order of Z squared.
+
+- `"tight_convergence_criteria": true` indicates making the convergence criteria stricter. (Equivalent to Gaussian's tight)
+
+- `"max_trust_radius": D` indicates making the maximum value of the step width calculated for each iteration D Å or less. By default, specifying "saddle_order": 1 sets it to 0.1 Å.
+
+- `"detect_negative_eigenvalues": true` is an option to abort the calculation if there are no negative eigenvalues in the eigenvalues calculated from the exact Hessian when seeking a saddle point of arbitrary order (transition state structure, etc.) at the first calculation (ITR. 0).
+
+The structure considered to be the exact transition state structure obtained by execution is shown below.
+
+(The exact transition state structure obtained by execution is saved as `Menschutkin_reaction_uma_ts_final_X.xyz` in a new directory generated in the `MultiOptPy-v1.20.0/"work_dir"` directory at the start of calculation.)
+
+`Menschutkin_reaction_uma_ts_final_1.xyz`
+```
+9
+OptimizedStructure
+C     -0.592057377437      0.033477313610     -0.025292453758
+H     -0.824027854979     -0.898311743914      0.457823006620
+H     -0.723638570519      0.938664351558      0.539300049784
+H     -0.702062247727      0.086856202084     -1.093230337334
+Cl    -3.034420896494      0.171578149649     -0.129629305153
+N      1.205338901506     -0.068154651603      0.051491594448
+H      1.533871810217     -0.886936783789     -0.450554308055
+H      1.513759146770     -0.134407196331      1.016310530296
+H      1.623237088662      0.757234358735     -0.366218776849
+```
+<MoleculeViewer xyzData={`9 
+OptimizedStructure 
+C -0.592057377437 0.033477313610 -0.025292453758 
+H -0.824027854979 -0.898311743914 0.457823006620 
+H -0.723638570519 0.938664351558 0.539300049784 
+H -0.702062247727 0.086856202084 -1.093230337334 
+Cl -3.034420896494 0.171578149649 -0.129629305153 
+N 1.205338901506 -0.068154651603 0.051491594448 
+H 1.533871810217 -0.886936783789 -0.450554308055 
+H 1.513759146770 -0.134407196331 1.016310530296 
+H 1.623237088662 0.757234358735 -0.366218776849`} caption="Transition State Structure (No.1)" backgroundColor="#333333" />
+
+A structure converged to a stationary point was obtained. I checked normal_modes.txt generated by the `"frequency_analysis": true` option and the animation of the vibration modes in the vibration_animation directory.
+
+Part of normal_modes.txt generated by the `"frequency_analysis": true` option is shown below.
+```
+Mode                                 0                   1                   2
+Freq [cm^-1]                     -494.3537             202.3520            207.4674
+Reduced mass [au]                   9.2402              1.0078              2.5334
+Force const [Dyne/A]               -1.3305               0.0243              0.0642
+Char temp [K]                       0.0000            291.1394            298.4993
+Normal mode                   x         y          z            x         y         z            x         y         z     
+       C                 0.25430   -0.01438    0.01087     -0.00022   -0.00042    0.00010   -0.00995   -0.20143   -0.03380
+       H                -0.00792    0.02987   -0.01589    0.00470   -0.17792   -0.33994    0.06426   -0.22270   -0.03336
+       H                -0.01112   -0.02752   -0.01811   -0.02554    -0.20569    0.32323   -0.09699   -0.21372   -0.04007
+       H                -0.01176   -0.00063    0.03271    0.02085    0.38221    0.01710    0.00022   -0.22156   -0.03623
+      Cl                -0.03877    0.00219   -0.00166     0.00016    0.00008   -0.00002    0.00211    0.04265    0.00713
+       N                -0.09792    0.00554   -0.00419   -0.00024    0.00018   -0.00005    0.00378    0.07674    0.01294
+       H                -0.09720    0.00271    -0.00570   -0.02796   -0.23130    0.35926    0.23671    0.15622    0.03553
+       H                -0.09724    0.00555   -0.00097    0.02352    0.42762    0.02174   -0.01885    0.17294    0.02679
+       H                -0.09687    0.00822   -0.00578    0.00486   -0.19528   -0.38125   -0.19266    0.18090    0.02249
+       
+(...snip...)
+```
+As a result, it was confirmed that there is one imaginary vibration. In other words, this structure is a transition state structure.
+
+Next, when checking the xyz file showing the molecular vibration indicating the imaginary vibration (`mode_1_XXXi_wave_number.xyz`) in vibration_animation using Avogadro, it was confirmed that among the obtained transition state structures, there exists a structure vibrating in the direction connecting the assumed reaction system and the product system.
+
+## Conclusion
+
+I explained the procedure for calculating one transition state structure of the Menschutkin reaction (chloromethane, ammonia) using the UMA model neural network potential (NNP, uma-s-1p1) with a self-made library.
+
+## References
+
+- https://github.com/ss0832/MultiOptPy (Repository of the self-made library MultiOptPy)
+
+- https://avogadro.cc/ (Avogadro, molecular structure visualization tool)
+
+- https://ai.meta.com/blog/meta-fair-science-new-open-source-releases/ (Article regarding the release of UMA)
+
+- https://github.com/facebookresearch/fairchem (GitHub repository provided by FAIR Chemistry)
+
+- https://fair-chem.github.io/ (Site explaining the contents of the above repository)
+
+- https://huggingface.co/facebook/UMA (NNP distribution site; requires account registration on Hugging Face and acceptance of the license agreement.)
+
+- arXiv preprint arXiv:2505.08762 (2025). (Preprint)
+
+- The Journal of Chemical Physics 2010, 132, 241102.
+
+- The Journal of Chemical Physics 1991, 94, 751–760.
+
+- In Classical and Quantum Dynamics in Condensed Phase Simulations; WORLD SCIENTIFIC: LERICI, Villa Marigola, 1998; pp 385–404.
+
+- The Journal of Chemical Physics, 2020, 153, 024109.
+
+- The Journal of Chemical Physics, 2022, 144, 214108.
