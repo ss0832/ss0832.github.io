@@ -77,4 +77,4 @@ highlighty876[at]gmail.com
 
 **最終更新**: 2025年12月4日
 
-**Last Updated**: June 1, 2025
+**Last Updated**: December 4, 2025
