@@ -6,6 +6,17 @@ Language: Japanese, (English)
 
 こちらのウェブページでは日本語・英語両方で自分用の備忘録を書いていきます。
 
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20a%20Coffee-ffdd00?style=for-the-badge&logo=buy-me-a-coffee&logoColor=black)](https://buymeacoffee.com/ss0832)
+
+もしこのブログが、あなたの勉強や教育活動の助けになったり、時間の節約になったりしたら、コーヒーを一杯ご馳走していただけると幸いです！
+あなたのサポートは、私のプロジェクトに対する大きな励みとなり、次の旅（挑戦）への活力になります。
+
+If this blog helped your studies, education, or saved your time, I'd appreciate a coffee!
+Your support serves as a great encouragement for my projects and fuels for my next journey.
+
+
+
+
 ## 免責事項・注意事項
 
 ### 情報の正確性について
@@ -64,6 +75,6 @@ Language: Japanese, (English)
 highlighty876[at]gmail.com
 
 
-**最終更新**: 2024年6月1日
+**最終更新**: 2025年12月4日
 
 **Last Updated**: June 1, 2025
