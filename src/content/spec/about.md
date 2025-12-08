@@ -14,7 +14,17 @@ Language: Japanese, (English)
 If this blog helped your studies, education, or saved your time, I'd appreciate a coffee!
 Your support serves as a great encouragement for my projects and fuels for my next journey.
 
+仮想通貨による寄付も受け付けております。
 
+Cryptocurrency donations are accepted.
+
+BTC::`3HRijME9bVz6L3jkD9GFGypLoBez7Jtz2s`
+
+ETH::`0xb5873f26d62981740ae8b7e6cc3fb36e0ad07884`
+
+なお、誤送信による取引の取り消しには仮想通貨の性質上応じることが出来ませんのでご了承ください。
+
+Please note that due to the immutable nature of cryptocurrency transactions, we cannot reverse or cancel any transactions resulting from accidental or erroneous transfers.
 
 
 ## 免責事項・注意事項
