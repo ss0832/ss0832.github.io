@@ -1,0 +1,54 @@
+{
+  "work_dir": "bh9_6_2",
+  "top_n_candidates": 3,
+  "multioptpy_version": "1.20.4",
+  
+  "step1_settings": {
+    "othersoft": "uma-s-1p1",
+    "opt_method": ["rsirfo_block_fsb"],
+    "use_model_hessian": "fischerd3",
+    "spin_multiplicity": 2,
+    "electronic_charge": 0, 
+	"manual_AFIR": ["150", "14", "1"]
+  },
+  
+  "step2_settings": {
+    "othersoft": "uma-s-1p1",
+    "NSTEP": 20,
+    "use_model_hessian": "fischerd3",
+    "save_pict": true,
+	"QSMv2": true,
+    "node_distance": 0.30,
+    "align_distances_energy_predicted": 2,
+    "spin_multiplicity": 2,
+    "electronic_charge": 0
+  },
+  
+  "step3_settings": {
+    "othersoft": "uma-s-1p1",
+    "opt_method": ["rsirfo_block_bofill"],
+    "calc_exact_hess": 2,
+    "tight_convergence_criteria": true,
+    "max_trust_radius": 0.30,
+	"min_trust_radius": 0.10,
+    "frequency_analysis": true,
+	"NSTEP": 500,
+	"detect_negative_eigenvalues": true,
+    "spin_multiplicity": 2,
+    "electronic_charge": 0
+  },
+
+  "step4_settings": {
+    "othersoft": "uma-s-1p1",
+	"opt_method": ["rsirfo_block_bofill"],
+    "spin_multiplicity": 2,
+    "electronic_charge": 0,
+	"calc_exact_hess": 10,
+    "tight_convergence_criteria": true,
+    "frequency_analysis": true,
+    
+    "intrinsic_reaction_coordinates": ["0.5", "200", "lqa"],
+
+    "step4b_opt_method": ["rsirfo_block_fsb"]
+  }
+}
