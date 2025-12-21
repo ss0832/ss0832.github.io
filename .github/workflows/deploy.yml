@@ -34,7 +34,10 @@ jobs:
           
       - name: Install MDX integration
         run: pnpm add @astrojs/mdx
-        
+
+      - name:  Increase Node.js memory limit
+        run: echo "NODE_OPTIONS=--max-old-space-size=4096" >> $GITHUB_ENV
+      
       - name: Install, build, and upload your site
         uses: withastro/action@v2
         with:
