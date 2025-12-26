@@ -1,0 +1,4 @@
+This is a Brave Creators publisher verification file.
+
+Domain: ss0832-github-io.pages.dev
+Token: a360df90e87218b3f4931148ded979bbe69c76f45b37d349258e75f4855016d0
